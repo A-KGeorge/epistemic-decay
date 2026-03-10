@@ -1,0 +1,15 @@
+# Dynamic Epistemic Decay Framework - Python Dependencies
+# Installation: pip install -r requirements.txt
+# After installation, run: python -m spacy download en_core_web_sm
+
+# Core dependencies
+numpy>=1.24.0
+spacy>=3.5.0
+sentence-transformers>=2.2.0
+requests>=2.28.0
+
+# Optional: For better performance with sentence-transformers
+torch>=2.0.0
+
+# Note: After installing these packages, you must download the spaCy language model:
+#   python -m spacy download en_core_web_sm

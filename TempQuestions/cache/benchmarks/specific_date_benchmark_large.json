@@ -1,0 +1,1854 @@
+{
+  "source": "Specific_Date_Benchmark_Expanded",
+  "version": "2.0",
+  "creation_date": "2026-03-10T15:31:12.011759",
+  "total_cases": 61,
+  "description": "Expanded benchmark for testing query temporal intent with explicit years. Includes manual high-quality cases plus additional synthetic cases. All documents contain era-appropriate correct information.",
+  "test_cases": [
+    {
+      "query": "Who was Apple's CEO in 1997?",
+      "entity": "Apple CEO",
+      "query_year": 1997,
+      "documents": {
+        "from_1997": {
+          "text": "Steve Jobs holds this position. Steve Jobs returned as CEO.",
+          "acquired": "1997-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1997
+        },
+        "from_2024": {
+          "text": "Tim Cook holds this position. Tim Cook continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1997",
+      "reasoning": "Query asks about 1997, should prefer document from 1997 with era-appropriate information"
+    },
+    {
+      "query": "Who was Apple's CEO in 2011?",
+      "entity": "Apple CEO",
+      "query_year": 2011,
+      "documents": {
+        "from_2011": {
+          "text": "Tim Cook holds this position. Tim Cook became CEO after Steve Jobs.",
+          "acquired": "2011-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2011
+        },
+        "from_2024": {
+          "text": "Tim Cook holds this position. Tim Cook continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2011",
+      "reasoning": "Query asks about 2011, should prefer document from 2011 with era-appropriate information"
+    },
+    {
+      "query": "Who was Microsoft's CEO in 1975?",
+      "entity": "Microsoft CEO",
+      "query_year": 1975,
+      "documents": {
+        "from_1975": {
+          "text": "Bill Gates holds this position. Bill Gates co-founded Microsoft and served as CEO.",
+          "acquired": "1975-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1975
+        },
+        "from_2024": {
+          "text": "Satya Nadella holds this position. Satya Nadella continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1975",
+      "reasoning": "Query asks about 1975, should prefer document from 1975 with era-appropriate information"
+    },
+    {
+      "query": "Who was Microsoft's CEO in 2000?",
+      "entity": "Microsoft CEO",
+      "query_year": 2000,
+      "documents": {
+        "from_2000": {
+          "text": "Steve Ballmer holds this position. Steve Ballmer became CEO.",
+          "acquired": "2000-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2000
+        },
+        "from_2024": {
+          "text": "Satya Nadella holds this position. Satya Nadella continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2000",
+      "reasoning": "Query asks about 2000, should prefer document from 2000 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Microsoft in 2014?",
+      "entity": "Microsoft CEO",
+      "query_year": 2014,
+      "documents": {
+        "from_2014": {
+          "text": "Satya Nadella holds this position. Satya Nadella became CEO.",
+          "acquired": "2014-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2014
+        },
+        "from_2024": {
+          "text": "Satya Nadella holds this position. Satya Nadella continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2014",
+      "reasoning": "Query asks about 2014, should prefer document from 2014 with era-appropriate information"
+    },
+    {
+      "query": "Who was Amazon's CEO in 1994?",
+      "entity": "Amazon CEO",
+      "query_year": 1994,
+      "documents": {
+        "from_1994": {
+          "text": "Jeff Bezos holds this position. Jeff Bezos founded Amazon and served as CEO.",
+          "acquired": "1994-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1994
+        },
+        "from_2024": {
+          "text": "Andy Jassy holds this position. Andy Jassy continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1994",
+      "reasoning": "Query asks about 1994, should prefer document from 1994 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Amazon in 2021?",
+      "entity": "Amazon CEO",
+      "query_year": 2021,
+      "documents": {
+        "from_2021": {
+          "text": "Andy Jassy holds this position. Andy Jassy became CEO after Jeff Bezos stepped down.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021
+        },
+        "from_2024": {
+          "text": "Andy Jassy holds this position. Andy Jassy continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2021",
+      "reasoning": "Query asks about 2021, should prefer document from 2021 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Google in 1998?",
+      "entity": "Google CEO",
+      "query_year": 1998,
+      "documents": {
+        "from_1998": {
+          "text": "Larry Page holds this position. Larry Page co-founded Google and served as CEO.",
+          "acquired": "1998-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1998
+        },
+        "from_2001": {
+          "text": "Eric Schmidt holds this position. Eric Schmidt became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2024": {
+          "text": "Sundar Pichai holds this position. Sundar Pichai continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1998",
+      "reasoning": "Query asks about 1998, should prefer document from 1998 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Google in 2001?",
+      "entity": "Google CEO",
+      "query_year": 2001,
+      "documents": {
+        "from_2001": {
+          "text": "Eric Schmidt holds this position. Eric Schmidt became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2001
+        },
+        "from_1998": {
+          "text": "Larry Page holds this position. Larry Page co-founded Google and served as CEO.",
+          "acquired": "1998-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1998
+        },
+        "from_2011": {
+          "text": "Larry Page holds this position. Larry Page returned as CEO.",
+          "acquired": "2011-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2011
+        },
+        "from_2024": {
+          "text": "Sundar Pichai holds this position. Sundar Pichai continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2001",
+      "reasoning": "Query asks about 2001, should prefer document from 2001 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Google in 2011?",
+      "entity": "Google CEO",
+      "query_year": 2011,
+      "documents": {
+        "from_2011": {
+          "text": "Larry Page holds this position. Larry Page returned as CEO.",
+          "acquired": "2011-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2011
+        },
+        "from_2001": {
+          "text": "Eric Schmidt holds this position. Eric Schmidt became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2015": {
+          "text": "Sundar Pichai holds this position. Sundar Pichai became CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2015
+        },
+        "from_2024": {
+          "text": "Sundar Pichai holds this position. Sundar Pichai continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2011",
+      "reasoning": "Query asks about 2011, should prefer document from 2011 with era-appropriate information"
+    },
+    {
+      "query": "Who was Google's CEO in 2015?",
+      "entity": "Google CEO",
+      "query_year": 2015,
+      "documents": {
+        "from_2015": {
+          "text": "Sundar Pichai holds this position. Sundar Pichai became CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2015
+        },
+        "from_2011": {
+          "text": "Larry Page holds this position. Larry Page returned as CEO.",
+          "acquired": "2011-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2011
+        },
+        "from_2024": {
+          "text": "Sundar Pichai holds this position. Sundar Pichai continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2015",
+      "reasoning": "Query asks about 2015, should prefer document from 2015 with era-appropriate information"
+    },
+    {
+      "query": "Who was Facebook/Meta's CEO in 2004?",
+      "entity": "Facebook/Meta CEO",
+      "query_year": 2004,
+      "documents": {
+        "from_2004": {
+          "text": "Mark Zuckerberg holds this position. Mark Zuckerberg founded Facebook and has remained CEO.",
+          "acquired": "2004-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2004
+        },
+        "from_2024": {
+          "text": "Mark Zuckerberg holds this position. Mark Zuckerberg continues as CEO of Meta.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2004",
+      "reasoning": "Query asks about 2004, should prefer document from 2004 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Tesla in 2008?",
+      "entity": "Tesla CEO",
+      "query_year": 2008,
+      "documents": {
+        "from_2008": {
+          "text": "Elon Musk holds this position. Elon Musk became CEO of Tesla.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2008
+        },
+        "from_2024": {
+          "text": "Elon Musk holds this position. Elon Musk continues as CEO.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2008",
+      "reasoning": "Query asks about 2008, should prefer document from 2008 with era-appropriate information"
+    },
+    {
+      "query": "Who was UK's PM in 1997?",
+      "entity": "UK Prime Minister",
+      "query_year": 1997,
+      "documents": {
+        "from_1997": {
+          "text": "Tony Blair holds this position. Tony Blair served as Prime Minister.",
+          "acquired": "1997-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1997
+        },
+        "from_2007": {
+          "text": "Gordon Brown holds this position. Gordon Brown became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2024": {
+          "text": "Rishi Sunak holds this position. Rishi Sunak serves as Prime Minister.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1997",
+      "reasoning": "Query asks about 1997, should prefer document from 1997 with era-appropriate information"
+    },
+    {
+      "query": "Who was the Prime Minister of UK in 2007?",
+      "entity": "UK Prime Minister",
+      "query_year": 2007,
+      "documents": {
+        "from_2007": {
+          "text": "Gordon Brown holds this position. Gordon Brown became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2007
+        },
+        "from_1997": {
+          "text": "Tony Blair holds this position. Tony Blair served as Prime Minister.",
+          "acquired": "1997-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1997
+        },
+        "from_2010": {
+          "text": "David Cameron holds this position. David Cameron became Prime Minister.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2010
+        },
+        "from_2016": {
+          "text": "Theresa May holds this position. Theresa May became Prime Minister.",
+          "acquired": "2016-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2016
+        },
+        "from_2024": {
+          "text": "Rishi Sunak holds this position. Rishi Sunak serves as Prime Minister.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2007",
+      "reasoning": "Query asks about 2007, should prefer document from 2007 with era-appropriate information"
+    },
+    {
+      "query": "Who was UK's PM in 2010?",
+      "entity": "UK Prime Minister",
+      "query_year": 2010,
+      "documents": {
+        "from_2010": {
+          "text": "David Cameron holds this position. David Cameron became Prime Minister.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2010
+        },
+        "from_2007": {
+          "text": "Gordon Brown holds this position. Gordon Brown became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2016": {
+          "text": "Theresa May holds this position. Theresa May became Prime Minister.",
+          "acquired": "2016-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2016
+        },
+        "from_2019": {
+          "text": "Boris Johnson holds this position. Boris Johnson became Prime Minister.",
+          "acquired": "2019-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2019
+        },
+        "from_2024": {
+          "text": "Rishi Sunak holds this position. Rishi Sunak serves as Prime Minister.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2010",
+      "reasoning": "Query asks about 2010, should prefer document from 2010 with era-appropriate information"
+    },
+    {
+      "query": "Who was UK's PM in 2016?",
+      "entity": "UK Prime Minister",
+      "query_year": 2016,
+      "documents": {
+        "from_2016": {
+          "text": "Theresa May holds this position. Theresa May became Prime Minister.",
+          "acquired": "2016-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2016
+        },
+        "from_2007": {
+          "text": "Gordon Brown holds this position. Gordon Brown became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2010": {
+          "text": "David Cameron holds this position. David Cameron became Prime Minister.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2010
+        },
+        "from_2019": {
+          "text": "Boris Johnson holds this position. Boris Johnson became Prime Minister.",
+          "acquired": "2019-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2019
+        },
+        "from_2022": {
+          "text": "Liz Truss holds this position. Liz Truss briefly served as Prime Minister.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        },
+        "from_2024": {
+          "text": "Rishi Sunak holds this position. Rishi Sunak serves as Prime Minister.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2016",
+      "reasoning": "Query asks about 2016, should prefer document from 2016 with era-appropriate information"
+    },
+    {
+      "query": "Who was UK's PM in 2019?",
+      "entity": "UK Prime Minister",
+      "query_year": 2019,
+      "documents": {
+        "from_2019": {
+          "text": "Boris Johnson holds this position. Boris Johnson became Prime Minister.",
+          "acquired": "2019-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2019
+        },
+        "from_2010": {
+          "text": "David Cameron holds this position. David Cameron became Prime Minister.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2010
+        },
+        "from_2016": {
+          "text": "Theresa May holds this position. Theresa May became Prime Minister.",
+          "acquired": "2016-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2016
+        },
+        "from_2022": {
+          "text": "Liz Truss holds this position. Liz Truss briefly served as Prime Minister.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        },
+        "from_2024": {
+          "text": "Rishi Sunak holds this position. Rishi Sunak serves as Prime Minister.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2019",
+      "reasoning": "Query asks about 2019, should prefer document from 2019 with era-appropriate information"
+    },
+    {
+      "query": "Who was UK's PM in 2022?",
+      "entity": "UK Prime Minister",
+      "query_year": 2022,
+      "documents": {
+        "from_2022": {
+          "text": "Liz Truss holds this position. Liz Truss briefly served as Prime Minister.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2022
+        },
+        "from_2016": {
+          "text": "Theresa May holds this position. Theresa May became Prime Minister.",
+          "acquired": "2016-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2016
+        },
+        "from_2019": {
+          "text": "Boris Johnson holds this position. Boris Johnson became Prime Minister.",
+          "acquired": "2019-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2019
+        },
+        "from_2024": {
+          "text": "Rishi Sunak holds this position. Rishi Sunak serves as Prime Minister.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2022",
+      "reasoning": "Query asks about 2022, should prefer document from 2022 with era-appropriate information"
+    },
+    {
+      "query": "Who was the President of US in 1993?",
+      "entity": "US President",
+      "query_year": 1993,
+      "documents": {
+        "from_1993": {
+          "text": "Bill Clinton holds this position. Bill Clinton served as President.",
+          "acquired": "1993-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1993
+        },
+        "from_2001": {
+          "text": "George W. Bush holds this position. George W. Bush became President.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2024": {
+          "text": "Joe Biden holds this position. Joe Biden continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1993",
+      "reasoning": "Query asks about 1993, should prefer document from 1993 with era-appropriate information"
+    },
+    {
+      "query": "Who was US's President in 2001?",
+      "entity": "US President",
+      "query_year": 2001,
+      "documents": {
+        "from_2001": {
+          "text": "George W. Bush holds this position. George W. Bush became President.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2001
+        },
+        "from_1993": {
+          "text": "Bill Clinton holds this position. Bill Clinton served as President.",
+          "acquired": "1993-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1993
+        },
+        "from_2009": {
+          "text": "Barack Obama holds this position. Barack Obama became President.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2024": {
+          "text": "Joe Biden holds this position. Joe Biden continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2001",
+      "reasoning": "Query asks about 2001, should prefer document from 2001 with era-appropriate information"
+    },
+    {
+      "query": "Who was the President of US in 2009?",
+      "entity": "US President",
+      "query_year": 2009,
+      "documents": {
+        "from_2009": {
+          "text": "Barack Obama holds this position. Barack Obama became President.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2009
+        },
+        "from_2001": {
+          "text": "George W. Bush holds this position. George W. Bush became President.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2017": {
+          "text": "Donald Trump holds this position. Donald Trump became President.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        },
+        "from_2024": {
+          "text": "Joe Biden holds this position. Joe Biden continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2009",
+      "reasoning": "Query asks about 2009, should prefer document from 2009 with era-appropriate information"
+    },
+    {
+      "query": "Who was US's President in 2017?",
+      "entity": "US President",
+      "query_year": 2017,
+      "documents": {
+        "from_2017": {
+          "text": "Donald Trump holds this position. Donald Trump became President.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2017
+        },
+        "from_2009": {
+          "text": "Barack Obama holds this position. Barack Obama became President.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2021": {
+          "text": "Joe Biden holds this position. Joe Biden became President.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        },
+        "from_2024": {
+          "text": "Joe Biden holds this position. Joe Biden continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2017",
+      "reasoning": "Query asks about 2017, should prefer document from 2017 with era-appropriate information"
+    },
+    {
+      "query": "Who was the President of US in 2021?",
+      "entity": "US President",
+      "query_year": 2021,
+      "documents": {
+        "from_2021": {
+          "text": "Joe Biden holds this position. Joe Biden became President.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021
+        },
+        "from_2017": {
+          "text": "Donald Trump holds this position. Donald Trump became President.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        },
+        "from_2024": {
+          "text": "Joe Biden holds this position. Joe Biden continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2021",
+      "reasoning": "Query asks about 2021, should prefer document from 2021 with era-appropriate information"
+    },
+    {
+      "query": "Who was France's President in 1995?",
+      "entity": "France President",
+      "query_year": 1995,
+      "documents": {
+        "from_1995": {
+          "text": "Jacques Chirac holds this position. Jacques Chirac served as President.",
+          "acquired": "1995-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1995
+        },
+        "from_2024": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_1995",
+      "reasoning": "Query asks about 1995, should prefer document from 1995 with era-appropriate information"
+    },
+    {
+      "query": "Who was France's President in 2007?",
+      "entity": "France President",
+      "query_year": 2007,
+      "documents": {
+        "from_2007": {
+          "text": "Nicolas Sarkozy holds this position. Nicolas Sarkozy became President.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2007
+        },
+        "from_2012": {
+          "text": "Fran\u00e7ois Hollande holds this position. Fran\u00e7ois Hollande became President.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2017": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron became President.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        },
+        "from_2024": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2007",
+      "reasoning": "Query asks about 2007, should prefer document from 2007 with era-appropriate information"
+    },
+    {
+      "query": "Who was France's President in 2012?",
+      "entity": "France President",
+      "query_year": 2012,
+      "documents": {
+        "from_2012": {
+          "text": "Fran\u00e7ois Hollande holds this position. Fran\u00e7ois Hollande became President.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2012
+        },
+        "from_2007": {
+          "text": "Nicolas Sarkozy holds this position. Nicolas Sarkozy became President.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2017": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron became President.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        },
+        "from_2024": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2012",
+      "reasoning": "Query asks about 2012, should prefer document from 2012 with era-appropriate information"
+    },
+    {
+      "query": "Who was the President of France in 2017?",
+      "entity": "France President",
+      "query_year": 2017,
+      "documents": {
+        "from_2017": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron became President.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2017
+        },
+        "from_2007": {
+          "text": "Nicolas Sarkozy holds this position. Nicolas Sarkozy became President.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2012": {
+          "text": "Fran\u00e7ois Hollande holds this position. Fran\u00e7ois Hollande became President.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2024": {
+          "text": "Emmanuel Macron holds this position. Emmanuel Macron continues as President.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024
+        }
+      },
+      "expected_winner": "from_2017",
+      "reasoning": "Query asks about 2017, should prefer document from 2017 with era-appropriate information"
+    },
+    {
+      "query": "Who was the CEO of Twitter or X in 2006?",
+      "entity": "Twitter/X CEO",
+      "query_year": 2006,
+      "documents": {
+        "from_2006": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey co-founded Twitter and served as CEO.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2006
+        },
+        "from_2008": {
+          "text": "Evan Williams holds this position. Evan Williams became CEO.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2010": {
+          "text": "Dick Costolo holds this position. Dick Costolo became CEO.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2010
+        },
+        "from_2015": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey returned as CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2015
+        },
+        "from_2022": {
+          "text": "Elon Musk holds this position. Elon Musk acquired Twitter and became CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2006",
+      "reasoning": "Query asks about 2006, should prefer document from 2006"
+    },
+    {
+      "query": "Who was the CEO of Twitter or X in 2008?",
+      "entity": "Twitter/X CEO",
+      "query_year": 2008,
+      "documents": {
+        "from_2008": {
+          "text": "Evan Williams holds this position. Evan Williams became CEO.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2008
+        },
+        "from_2006": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey co-founded Twitter and served as CEO.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2010": {
+          "text": "Dick Costolo holds this position. Dick Costolo became CEO.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2010
+        },
+        "from_2015": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey returned as CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2015
+        },
+        "from_2022": {
+          "text": "Elon Musk holds this position. Elon Musk acquired Twitter and became CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2008",
+      "reasoning": "Query asks about 2008, should prefer document from 2008"
+    },
+    {
+      "query": "Who was the CEO of Twitter or X in 2010?",
+      "entity": "Twitter/X CEO",
+      "query_year": 2010,
+      "documents": {
+        "from_2010": {
+          "text": "Dick Costolo holds this position. Dick Costolo became CEO.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2010
+        },
+        "from_2006": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey co-founded Twitter and served as CEO.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2008": {
+          "text": "Evan Williams holds this position. Evan Williams became CEO.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2015": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey returned as CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2015
+        },
+        "from_2022": {
+          "text": "Elon Musk holds this position. Elon Musk acquired Twitter and became CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2010",
+      "reasoning": "Query asks about 2010, should prefer document from 2010"
+    },
+    {
+      "query": "Who was the CEO of Twitter or X in 2015?",
+      "entity": "Twitter/X CEO",
+      "query_year": 2015,
+      "documents": {
+        "from_2015": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey returned as CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2015
+        },
+        "from_2006": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey co-founded Twitter and served as CEO.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2008": {
+          "text": "Evan Williams holds this position. Evan Williams became CEO.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2010": {
+          "text": "Dick Costolo holds this position. Dick Costolo became CEO.",
+          "acquired": "2010-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2010
+        },
+        "from_2021": {
+          "text": "Parag Agrawal holds this position. Parag Agrawal became CEO.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        },
+        "from_2022": {
+          "text": "Elon Musk holds this position. Elon Musk acquired Twitter and became CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2015",
+      "reasoning": "Query asks about 2015, should prefer document from 2015"
+    },
+    {
+      "query": "Who was the CEO of Twitter or X in 2021?",
+      "entity": "Twitter/X CEO",
+      "query_year": 2021,
+      "documents": {
+        "from_2021": {
+          "text": "Parag Agrawal holds this position. Parag Agrawal became CEO.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021
+        },
+        "from_2015": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey returned as CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2015
+        },
+        "from_2022": {
+          "text": "Elon Musk holds this position. Elon Musk acquired Twitter and became CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2021",
+      "reasoning": "Query asks about 2021, should prefer document from 2021"
+    },
+    {
+      "query": "Who was the CEO of Twitter or X in 2022?",
+      "entity": "Twitter/X CEO",
+      "query_year": 2022,
+      "documents": {
+        "from_2022": {
+          "text": "Elon Musk holds this position. Elon Musk acquired Twitter and became CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2022
+        },
+        "from_2015": {
+          "text": "Jack Dorsey holds this position. Jack Dorsey returned as CEO.",
+          "acquired": "2015-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2015
+        },
+        "from_2021": {
+          "text": "Parag Agrawal holds this position. Parag Agrawal became CEO.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2022",
+      "reasoning": "Query asks about 2022, should prefer document from 2022"
+    },
+    {
+      "query": "Who was the CEO of Netflix in 1997?",
+      "entity": "Netflix CEO",
+      "query_year": 1997,
+      "documents": {
+        "from_1997": {
+          "text": "Reed Hastings holds this position. Reed Hastings co-founded Netflix and served as CEO.",
+          "acquired": "1997-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1997
+        },
+        "from_2023": {
+          "text": "Ted Sarandos holds this position. Ted Sarandos continues as co-CEO with Greg Peters.",
+          "acquired": "2023-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2023
+        }
+      },
+      "expected_winner": "from_1997",
+      "reasoning": "Query asks about 1997, should prefer document from 1997"
+    },
+    {
+      "query": "Who was the CEO of Netflix in 2020?",
+      "entity": "Netflix CEO",
+      "query_year": 2020,
+      "documents": {
+        "from_2020": {
+          "text": "Ted Sarandos holds this position. Ted Sarandos became co-CEO alongside Reed Hastings.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2020
+        },
+        "from_2023": {
+          "text": "Ted Sarandos holds this position. Ted Sarandos continues as co-CEO with Greg Peters.",
+          "acquired": "2023-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2023
+        }
+      },
+      "expected_winner": "from_2020",
+      "reasoning": "Query asks about 2020, should prefer document from 2020"
+    },
+    {
+      "query": "Who was the CEO of Netflix in 2023?",
+      "entity": "Netflix CEO",
+      "query_year": 2023,
+      "documents": {
+        "from_2023": {
+          "text": "Ted Sarandos holds this position. Ted Sarandos continues as co-CEO with Greg Peters.",
+          "acquired": "2023-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2023
+        },
+        "from_2020": {
+          "text": "Ted Sarandos holds this position. Ted Sarandos became co-CEO alongside Reed Hastings.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        }
+      },
+      "expected_winner": "from_2023",
+      "reasoning": "Query asks about 2023, should prefer document from 2023"
+    },
+    {
+      "query": "Who was the CEO of IBM in 1993?",
+      "entity": "IBM CEO",
+      "query_year": 1993,
+      "documents": {
+        "from_1993": {
+          "text": "Louis Gerstner holds this position. Louis Gerstner became CEO.",
+          "acquired": "1993-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1993
+        },
+        "from_2002": {
+          "text": "Sam Palmisano holds this position. Sam Palmisano became CEO.",
+          "acquired": "2002-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2002
+        },
+        "from_2020": {
+          "text": "Arvind Krishna holds this position. Arvind Krishna became CEO.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        }
+      },
+      "expected_winner": "from_1993",
+      "reasoning": "Query asks about 1993, should prefer document from 1993"
+    },
+    {
+      "query": "Who was the CEO of IBM in 2002?",
+      "entity": "IBM CEO",
+      "query_year": 2002,
+      "documents": {
+        "from_2002": {
+          "text": "Sam Palmisano holds this position. Sam Palmisano became CEO.",
+          "acquired": "2002-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2002
+        },
+        "from_1993": {
+          "text": "Louis Gerstner holds this position. Louis Gerstner became CEO.",
+          "acquired": "1993-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1993
+        },
+        "from_2012": {
+          "text": "Ginni Rometty holds this position. Ginni Rometty became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2020": {
+          "text": "Arvind Krishna holds this position. Arvind Krishna became CEO.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        }
+      },
+      "expected_winner": "from_2002",
+      "reasoning": "Query asks about 2002, should prefer document from 2002"
+    },
+    {
+      "query": "Who was the CEO of IBM in 2012?",
+      "entity": "IBM CEO",
+      "query_year": 2012,
+      "documents": {
+        "from_2012": {
+          "text": "Ginni Rometty holds this position. Ginni Rometty became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2012
+        },
+        "from_2002": {
+          "text": "Sam Palmisano holds this position. Sam Palmisano became CEO.",
+          "acquired": "2002-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2002
+        },
+        "from_2020": {
+          "text": "Arvind Krishna holds this position. Arvind Krishna became CEO.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        }
+      },
+      "expected_winner": "from_2012",
+      "reasoning": "Query asks about 2012, should prefer document from 2012"
+    },
+    {
+      "query": "Who was the CEO of IBM in 2020?",
+      "entity": "IBM CEO",
+      "query_year": 2020,
+      "documents": {
+        "from_2020": {
+          "text": "Arvind Krishna holds this position. Arvind Krishna became CEO.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2020
+        },
+        "from_2012": {
+          "text": "Ginni Rometty holds this position. Ginni Rometty became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        }
+      },
+      "expected_winner": "from_2020",
+      "reasoning": "Query asks about 2020, should prefer document from 2020"
+    },
+    {
+      "query": "Who was the CEO of Yahoo in 1995?",
+      "entity": "Yahoo CEO",
+      "query_year": 1995,
+      "documents": {
+        "from_1995": {
+          "text": "Jerry Yang holds this position. Jerry Yang co-founded Yahoo.",
+          "acquired": "1995-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1995
+        },
+        "from_2001": {
+          "text": "Terry Semel holds this position. Terry Semel became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2017": {
+          "text": "Marissa Mayer holds this position. Yahoo was sold to Verizon.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        }
+      },
+      "expected_winner": "from_1995",
+      "reasoning": "Query asks about 1995, should prefer document from 1995"
+    },
+    {
+      "query": "Who was the CEO of Yahoo in 2001?",
+      "entity": "Yahoo CEO",
+      "query_year": 2001,
+      "documents": {
+        "from_2001": {
+          "text": "Terry Semel holds this position. Terry Semel became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2001
+        },
+        "from_1995": {
+          "text": "Jerry Yang holds this position. Jerry Yang co-founded Yahoo.",
+          "acquired": "1995-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1995
+        },
+        "from_2007": {
+          "text": "Jerry Yang holds this position. Jerry Yang returned as CEO.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2009": {
+          "text": "Carol Bartz holds this position. Carol Bartz became CEO.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2017": {
+          "text": "Marissa Mayer holds this position. Yahoo was sold to Verizon.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        }
+      },
+      "expected_winner": "from_2001",
+      "reasoning": "Query asks about 2001, should prefer document from 2001"
+    },
+    {
+      "query": "Who was the CEO of Yahoo in 2007?",
+      "entity": "Yahoo CEO",
+      "query_year": 2007,
+      "documents": {
+        "from_2007": {
+          "text": "Jerry Yang holds this position. Jerry Yang returned as CEO.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2007
+        },
+        "from_2001": {
+          "text": "Terry Semel holds this position. Terry Semel became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2009": {
+          "text": "Carol Bartz holds this position. Carol Bartz became CEO.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2012": {
+          "text": "Marissa Mayer holds this position. Marissa Mayer became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2017": {
+          "text": "Marissa Mayer holds this position. Yahoo was sold to Verizon.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        }
+      },
+      "expected_winner": "from_2007",
+      "reasoning": "Query asks about 2007, should prefer document from 2007"
+    },
+    {
+      "query": "Who was the CEO of Yahoo in 2009?",
+      "entity": "Yahoo CEO",
+      "query_year": 2009,
+      "documents": {
+        "from_2009": {
+          "text": "Carol Bartz holds this position. Carol Bartz became CEO.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2009
+        },
+        "from_2001": {
+          "text": "Terry Semel holds this position. Terry Semel became CEO.",
+          "acquired": "2001-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2001
+        },
+        "from_2007": {
+          "text": "Jerry Yang holds this position. Jerry Yang returned as CEO.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2012": {
+          "text": "Marissa Mayer holds this position. Marissa Mayer became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2017": {
+          "text": "Marissa Mayer holds this position. Yahoo was sold to Verizon.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        }
+      },
+      "expected_winner": "from_2009",
+      "reasoning": "Query asks about 2009, should prefer document from 2009"
+    },
+    {
+      "query": "Who was the CEO of Yahoo in 2012?",
+      "entity": "Yahoo CEO",
+      "query_year": 2012,
+      "documents": {
+        "from_2012": {
+          "text": "Marissa Mayer holds this position. Marissa Mayer became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2012
+        },
+        "from_2007": {
+          "text": "Jerry Yang holds this position. Jerry Yang returned as CEO.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2009": {
+          "text": "Carol Bartz holds this position. Carol Bartz became CEO.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2017": {
+          "text": "Marissa Mayer holds this position. Yahoo was sold to Verizon.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2017
+        }
+      },
+      "expected_winner": "from_2012",
+      "reasoning": "Query asks about 2012, should prefer document from 2012"
+    },
+    {
+      "query": "Who was the CEO of Yahoo in 2017?",
+      "entity": "Yahoo CEO",
+      "query_year": 2017,
+      "documents": {
+        "from_2017": {
+          "text": "Marissa Mayer holds this position. Yahoo was sold to Verizon.",
+          "acquired": "2017-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2017
+        },
+        "from_2007": {
+          "text": "Jerry Yang holds this position. Jerry Yang returned as CEO.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2009": {
+          "text": "Carol Bartz holds this position. Carol Bartz became CEO.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2012": {
+          "text": "Marissa Mayer holds this position. Marissa Mayer became CEO.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        }
+      },
+      "expected_winner": "from_2017",
+      "reasoning": "Query asks about 2017, should prefer document from 2017"
+    },
+    {
+      "query": "Who was the CEO of Disney in 1984?",
+      "entity": "Disney CEO",
+      "query_year": 1984,
+      "documents": {
+        "from_1984": {
+          "text": "Michael Eisner holds this position. Michael Eisner became CEO.",
+          "acquired": "1984-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1984
+        },
+        "from_2022": {
+          "text": "Bob Iger holds this position. Bob Iger returned as CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_1984",
+      "reasoning": "Query asks about 1984, should prefer document from 1984"
+    },
+    {
+      "query": "Who was the CEO of Disney in 2005?",
+      "entity": "Disney CEO",
+      "query_year": 2005,
+      "documents": {
+        "from_2005": {
+          "text": "Bob Iger holds this position. Bob Iger became CEO.",
+          "acquired": "2005-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2005
+        },
+        "from_2022": {
+          "text": "Bob Iger holds this position. Bob Iger returned as CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2005",
+      "reasoning": "Query asks about 2005, should prefer document from 2005"
+    },
+    {
+      "query": "Who was the CEO of Disney in 2020?",
+      "entity": "Disney CEO",
+      "query_year": 2020,
+      "documents": {
+        "from_2020": {
+          "text": "Bob Chapek holds this position. Bob Chapek became CEO.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2020
+        },
+        "from_2022": {
+          "text": "Bob Iger holds this position. Bob Iger returned as CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2022
+        }
+      },
+      "expected_winner": "from_2020",
+      "reasoning": "Query asks about 2020, should prefer document from 2020"
+    },
+    {
+      "query": "Who was the CEO of Disney in 2022?",
+      "entity": "Disney CEO",
+      "query_year": 2022,
+      "documents": {
+        "from_2022": {
+          "text": "Bob Iger holds this position. Bob Iger returned as CEO.",
+          "acquired": "2022-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2022
+        },
+        "from_2020": {
+          "text": "Bob Chapek holds this position. Bob Chapek became CEO.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        }
+      },
+      "expected_winner": "from_2022",
+      "reasoning": "Query asks about 2022, should prefer document from 2022"
+    },
+    {
+      "query": "Who was the Chancellor of Germany in 1998?",
+      "entity": "Germany Chancellor",
+      "query_year": 1998,
+      "documents": {
+        "from_1998": {
+          "text": "Gerhard Schr\u00f6der holds this position. Gerhard Schr\u00f6der became Chancellor.",
+          "acquired": "1998-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1998
+        },
+        "from_2005": {
+          "text": "Angela Merkel holds this position. Angela Merkel became Chancellor.",
+          "acquired": "2005-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2005
+        },
+        "from_2021": {
+          "text": "Olaf Scholz holds this position. Olaf Scholz became Chancellor.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_1998",
+      "reasoning": "Query asks about 1998, should prefer document from 1998"
+    },
+    {
+      "query": "Who was the Chancellor of Germany in 2005?",
+      "entity": "Germany Chancellor",
+      "query_year": 2005,
+      "documents": {
+        "from_2005": {
+          "text": "Angela Merkel holds this position. Angela Merkel became Chancellor.",
+          "acquired": "2005-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2005
+        },
+        "from_1998": {
+          "text": "Gerhard Schr\u00f6der holds this position. Gerhard Schr\u00f6der became Chancellor.",
+          "acquired": "1998-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1998
+        },
+        "from_2021": {
+          "text": "Olaf Scholz holds this position. Olaf Scholz became Chancellor.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2005",
+      "reasoning": "Query asks about 2005, should prefer document from 2005"
+    },
+    {
+      "query": "Who was the Chancellor of Germany in 2021?",
+      "entity": "Germany Chancellor",
+      "query_year": 2021,
+      "documents": {
+        "from_2021": {
+          "text": "Olaf Scholz holds this position. Olaf Scholz became Chancellor.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021
+        },
+        "from_1998": {
+          "text": "Gerhard Schr\u00f6der holds this position. Gerhard Schr\u00f6der became Chancellor.",
+          "acquired": "1998-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 1998
+        }
+      },
+      "expected_winner": "from_2021",
+      "reasoning": "Query asks about 2021, should prefer document from 2021"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2006?",
+      "entity": "Japan PM",
+      "query_year": 2006,
+      "documents": {
+        "from_2006": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe became Prime Minister.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2006
+        },
+        "from_2007": {
+          "text": "Yasuo Fukuda holds this position. Yasuo Fukuda became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2008": {
+          "text": "Taro Aso holds this position. Taro Aso became Prime Minister.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2009": {
+          "text": "Yukio Hatoyama holds this position. Yukio Hatoyama became Prime Minister.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2006",
+      "reasoning": "Query asks about 2006, should prefer document from 2006"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2007?",
+      "entity": "Japan PM",
+      "query_year": 2007,
+      "documents": {
+        "from_2007": {
+          "text": "Yasuo Fukuda holds this position. Yasuo Fukuda became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2007
+        },
+        "from_2006": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe became Prime Minister.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2008": {
+          "text": "Taro Aso holds this position. Taro Aso became Prime Minister.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2009": {
+          "text": "Yukio Hatoyama holds this position. Yukio Hatoyama became Prime Minister.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2007",
+      "reasoning": "Query asks about 2007, should prefer document from 2007"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2008?",
+      "entity": "Japan PM",
+      "query_year": 2008,
+      "documents": {
+        "from_2008": {
+          "text": "Taro Aso holds this position. Taro Aso became Prime Minister.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2008
+        },
+        "from_2006": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe became Prime Minister.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2007": {
+          "text": "Yasuo Fukuda holds this position. Yasuo Fukuda became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2009": {
+          "text": "Yukio Hatoyama holds this position. Yukio Hatoyama became Prime Minister.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2008",
+      "reasoning": "Query asks about 2008, should prefer document from 2008"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2009?",
+      "entity": "Japan PM",
+      "query_year": 2009,
+      "documents": {
+        "from_2009": {
+          "text": "Yukio Hatoyama holds this position. Yukio Hatoyama became Prime Minister.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2009
+        },
+        "from_2006": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe became Prime Minister.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2007": {
+          "text": "Yasuo Fukuda holds this position. Yasuo Fukuda became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2008": {
+          "text": "Taro Aso holds this position. Taro Aso became Prime Minister.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2009",
+      "reasoning": "Query asks about 2009, should prefer document from 2009"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2012?",
+      "entity": "Japan PM",
+      "query_year": 2012,
+      "documents": {
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2012
+        },
+        "from_2006": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe became Prime Minister.",
+          "acquired": "2006-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2006
+        },
+        "from_2007": {
+          "text": "Yasuo Fukuda holds this position. Yasuo Fukuda became Prime Minister.",
+          "acquired": "2007-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2007
+        },
+        "from_2008": {
+          "text": "Taro Aso holds this position. Taro Aso became Prime Minister.",
+          "acquired": "2008-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2008
+        },
+        "from_2009": {
+          "text": "Yukio Hatoyama holds this position. Yukio Hatoyama became Prime Minister.",
+          "acquired": "2009-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2009
+        },
+        "from_2020": {
+          "text": "Yoshihide Suga holds this position. Yoshihide Suga became Prime Minister.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        },
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2012",
+      "reasoning": "Query asks about 2012, should prefer document from 2012"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2020?",
+      "entity": "Japan PM",
+      "query_year": 2020,
+      "documents": {
+        "from_2020": {
+          "text": "Yoshihide Suga holds this position. Yoshihide Suga became Prime Minister.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2020
+        },
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2021
+        }
+      },
+      "expected_winner": "from_2020",
+      "reasoning": "Query asks about 2020, should prefer document from 2020"
+    },
+    {
+      "query": "Who was the Prime Minister of Japan in 2021?",
+      "entity": "Japan PM",
+      "query_year": 2021,
+      "documents": {
+        "from_2021": {
+          "text": "Fumio Kishida holds this position. Fumio Kishida became Prime Minister.",
+          "acquired": "2021-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021
+        },
+        "from_2012": {
+          "text": "Shinzo Abe holds this position. Shinzo Abe returned as Prime Minister.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012
+        },
+        "from_2020": {
+          "text": "Yoshihide Suga holds this position. Yoshihide Suga became Prime Minister.",
+          "acquired": "2020-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2020
+        }
+      },
+      "expected_winner": "from_2021",
+      "reasoning": "Query asks about 2021, should prefer document from 2021"
+    }
+  ]
+}
