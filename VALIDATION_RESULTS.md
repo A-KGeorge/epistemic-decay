@@ -1,8 +1,7 @@
 # Temporal Decay Framework: Complete Validation Results
 
 **Date**: March 10, 2026  
-**Author**: Alan Kochukalam George  
-**Institution**: Memorial University of Newfoundland
+**Author**: Alan Kochukalam George
 
 ---
 
@@ -341,7 +340,6 @@ If you use this framework, please cite:
   author = {George, Alan Kochukalam},
   title = {Dynamic Epistemic Decay Framework: Document and Query-Side Temporal Retrieval},
   year = {2026},
-  institution = {Memorial University of Newfoundland},
   note = {Validated on 1,954 test cases with 92.7\% accuracy}
 }
 ```
@@ -632,7 +630,6 @@ Across all rescued cases (n=82):
   author = {George, Alan Kochukalam},
   title = {Dynamic Epistemic Decay Framework: Temporal Knowledge Representation for RAG Systems},
   year = {2026},
-  institution = {Memorial University of Newfoundland},
   note = {Validated on 120 test cases with 94.2\% accuracy and zero regressions}
 }
 ```

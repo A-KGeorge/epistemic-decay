@@ -187,7 +187,6 @@ If you use this framework, please cite:
   author = {George, Alan Kochukalam},
   title = {Dynamic Epistemic Decay Framework},
   year = {2026},
-  institution = {Memorial University of Newfoundland}
 }
 ```
 
@@ -533,7 +532,6 @@ Computer Engineering, Memorial University of Newfoundland.
 
 Alan Kochukalam George  
 B.Eng. Computer Engineering  
-Memorial University of Newfoundland  
 St. John's, NL, Canada | 2025
 
 ---

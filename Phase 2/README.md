@@ -342,7 +342,6 @@ If you use Phase 2, please cite:
   author = {George, Alan Kochukalam},
   title = {Query-Side Temporal Intent Analysis for Temporal Knowledge Retrieval},
   year = {2026},
-  institution = {Memorial University of Newfoundland}
 }
 ```
 
