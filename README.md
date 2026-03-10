@@ -215,16 +215,10 @@ Current Phase 2 failures (6/61 manual cases) occur when:
 
 ## Complete Validation Results
 
-📊 **View comprehensive results**: [VALIDATION_RESULTS.md](VALIDATION_RESULTS.md)
+📊 **View comprehensive results**: [VALIDATION_RESULTS.md](VALIDATION_RESULTS.md)  
+📈 **Latest benchmark runs**: [RESULTS.md](RESULTS.md) (auto-generated with timestamps)
 
-**Summary across all benchmarks** (120 test cases):
-
-- Phase 1 Adversarial: 23/23 (100%)
-- Phase 2 Contamination: 9/9 (100%)
-- TempQuestions Large-Scale: 81/88 (92%)
-- **Total: 113/120 (94.2%)**
-- **Improvement over standard: +68.3%**
-- **Regressions: 0**
+**Summary**: 1,977 test cases across 4 benchmarks with zero regressions
 
 ---
 
