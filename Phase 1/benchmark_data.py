@@ -389,4 +389,23 @@ benchmark = [
             },
         ]
     },
+    
+    # CASE 24: Parallel lines geometry (tests zero-decay fragility)
+    {
+        "query": "Do parallel lines meet in Euclidean geometry?",
+        "entries": [
+            {
+                "text": "Two parallel lines never meet in Euclidean geometry.",
+                "acquired": datetime(2015, 8, 1),
+                "category": "MATHEMATICAL_TRUTH",
+                "valid_until": None
+            },
+            {
+                "text": "Two parallel lines never meet in non-Euclidean geometry.",
+                "acquired": datetime(2015, 8, 1),
+                "category": "MATHEMATICAL_TRUTH",
+                "valid_until": None
+            },
+        ]
+    },
 ]
