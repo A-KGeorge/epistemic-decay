@@ -369,14 +369,14 @@ python -m spacy download en_core_web_sm
 
 ```powershell
 cd "Phase 1"
-python main.py
+python phase_1.py
 ```
 
 ### Run Phase 2 Benchmark (9 contamination cases)
 
 ```powershell
 cd "Phase 2"
-python main.py
+python evaluate_query_intent.py
 ```
 
 ### Output
@@ -502,9 +502,9 @@ Standard retrieval consistently prefers semantically richer stale documents over
 If you use this framework, please cite:
 
 ```
-Alan Kochukalam George (2025). Dynamic Epistemic Decay Framework:
+Alan Kochukalam George (2026). Dynamic Epistemic Decay Framework:
 A Multi-Dimensional Theory of Knowledge Validity, Propagation, and Stability.
-Computer Engineering, Memorial University of Newfoundland.
+Computer Engineering.
 ```
 
 ---
