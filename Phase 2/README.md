@@ -485,7 +485,7 @@ If you use Phase 2 contamination logic, please cite:
 
 ```
 
-Alan Kochukalam George (2025). Dynamic Epistemic Decay Framework:
+Alan Kochukalam George (2026). Dynamic Epistemic Decay Framework:
 Phase 2 - Compositional Contamination and Zero-Decay Fragility.
 Computer Engineering, Memorial University of Newfoundland.
 

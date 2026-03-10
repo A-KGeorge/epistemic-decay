@@ -205,19 +205,6 @@ Current Phase 2 failures (6/61 manual cases) occur when:
 
 📂 **See**: [Phase 2/analyze_failures.py](Phase%202/analyze_failures.py) for detailed failure analysis
 
-```powershell
-cd TempQuestions
-
-# Evaluate Phase 1 (temporal decay only)
-python evaluate_phase1.py
-
-# Evaluate Phase 2 (contamination detection)
-python evaluate_phase2.py
-
-# Compare all three approaches
-python evaluate_combined.py
-```
-
 **Scaling**:
 
 - **Demo (100 entries)**: `python tempquestions_full_scale.py --demo` (~2 minutes)
@@ -532,13 +519,13 @@ Computer Engineering, Memorial University of Newfoundland.
 
 Alan Kochukalam George  
 B.Eng. Computer Engineering  
-St. John's, NL, Canada | 2025
+St. John's, NL, Canada | 2026
 
 ---
 
 ## License
 
-[Specify license here]
+Apache License 2.0 - See LICENSE file for details
 
 ---
 
