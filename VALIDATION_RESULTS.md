@@ -12,19 +12,20 @@
 
 The temporal decay framework has been validated across **four independent benchmarks** totaling **1,977 test cases**:
 
-| Benchmark                 | Test Cases | Purpose |
-| ------------------------- | ---------- | ------- |
-| **Phase 1 Adversarial**   | 23         | Document-side decay with semantic richness bias |
+| Benchmark                 | Test Cases | Purpose                                          |
+| ------------------------- | ---------- | ------------------------------------------------ |
+| **Phase 1 Adversarial**   | 23         | Document-side decay with semantic richness bias  |
 | **Verified Programmatic** | 153        | Query-side intent with verified historical facts |
-| **Manual Specific Date**  | 61         | Hand-crafted adversarial cases |
-| **TempQuestions**         | 1,740      | Large-scale external validation |
-| **TOTAL**                 | **1,977**  | Comprehensive temporal reasoning coverage |
+| **Manual Specific Date**  | 61         | Hand-crafted adversarial cases                   |
+| **TempQuestions**         | 1,740      | Large-scale external validation                  |
+| **TOTAL**                 | **1,977**  | Comprehensive temporal reasoning coverage        |
 
 ### Latest Performance
 
 **See [RESULTS.md](RESULTS.md) for current numbers** (updated automatically on each benchmark run)
 
 Expected performance based on latest validations:
+
 - **Phase 1 Adversarial**: 100% (23/23) - All time-sensitive cases rescued, zero regressions on stable facts
 - **Verified Programmatic**: 100% (153/153) - Perfect year matching on programmatic benchmark
 - **Manual Specific Date**: 90.2% (55/61) - High accuracy on adversarial cases
@@ -96,9 +97,10 @@ After each run, [RESULTS.md](RESULTS.md) is automatically updated with timestamp
 - ✅ Programmatic benchmarks prevent overfitting criticism
 - ✅ Results automatically tracked in [RESULTS.md](RESULTS.md)
 - ✅ Comprehensive methodology documented in [VALIDATION_METHODOLOGY.md](VALIDATION_METHODOLOGY.md)
-  Standard:  11/23 (47.8%)
-  Phase 1:   23/23 (100.0%)
-```
+  Standard: 11/23 (47.8%)
+  Phase 1: 23/23 (100.0%)
+
+````
 
 **Key Findings**:
 
@@ -112,7 +114,7 @@ After each run, [RESULTS.md](RESULTS.md) is automatically updated with timestamp
 ```powershell
 cd "Phase 1"
 python phase_1.py
-```
+````
 
 ---
 
