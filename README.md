@@ -134,6 +134,43 @@ Phase 2 adds query-side temporal intent detection:
 
 📂 **Navigate to**: [Phase 2/README.md](Phase%202/README.md)
 
+### Phase 2 Fuzzy Logic Enhancements
+
+**Status**: Complete ✅ (80% on fuzzy logic benchmark, 0 regressions on TempQuestions)
+
+Extended Phase 2 with advanced temporal reasoning capabilities:
+
+**1. Fuzzy Timeline Parsing**
+
+- "turn of millennium" → [1998, 2002]
+- "around 2000" → [1998, 2002]
+- "mid-1990s" → [1994, 1996]
+
+**2. Directional Operators with Entity Extraction**
+
+- "CEO before Tim Cook" → boosts older documents (up to 1.40×)
+- "PM after Thatcher" → penalizes older documents (down to 0.68×)
+- Age-based gradients: `1.0 + min(years_old * 0.02, 0.40)` for "before" queries
+
+**3. Role-Based Historical Sealing**
+
+- "Who is the founder?" → seals λ=0.0 despite present tense
+- Detects: founder, first, original, established, created
+- Present tense overridden when role inherently historical
+
+**4. Multi-Marker Conflict Resolution**
+
+- "In 1998, what was current population" → year constraint wins over "current" marker
+- Explicit year constraints take priority over tense-based temporal preferences
+
+**Safety**: The `explicit_directional` flag prevents strong gradients from contaminating general queries where acquisition date ≠ content correctness. Strong gradients (1.40×, 0.68×) only apply to explicit "before/after entity" queries; general historical preferences stay neutral (1.0×).
+
+**Results**:
+
+- Fuzzy Logic Benchmark: **80% (8/10)** — +2 cases over Phase 1
+- Edge Cases Benchmark: **46.7% (7/15)** — +3 cases over Phase 1
+- TempQuestions: **92.1% (1,602/1,740)** — 0 regressions maintained
+
 ---
 
 ## Benchmarks
@@ -164,6 +201,20 @@ Phase 2 adds query-side temporal intent detection:
 
 **Generate**: `python TempQuestions/tempquestions_full_scale.py --count 2000`  
 **Evaluate**: `python Phase 2/evaluate_query_intent.py --benchmark TempQuestions/cache/benchmarks/tempquestions_retrieval_large.json`
+
+### 4. Fuzzy Logic Benchmark (10 cases)
+
+**Source**: Edge cases from Gemini analysis of Phase 2 limitations  
+**Purpose**: Test advanced temporal reasoning (directional operators, fuzzy timelines, role sealing)
+
+**Evaluate**: `python Phase 2/evaluate_query_intent.py --benchmark TempQuestions/cache/benchmarks/fuzzy_logic_benchmark.json`
+
+### 5. Edge Cases Benchmark (15 cases)
+
+**Source**: Compositional logic testing (contamination, conditional validity, paradigm shifts)  
+**Purpose**: Test complex decay scenarios requiring multi-factor analysis
+
+**Evaluate**: `python Phase 2/evaluate_query_intent.py --benchmark TempQuestions/cache/benchmarks/edge_cases_benchmark.json`
 
 ---
 

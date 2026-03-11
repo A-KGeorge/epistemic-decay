@@ -28,8 +28,29 @@ def extract_year_constraints(text: str) -> List[int]:
     - "in 1997" → [1997]
     - "between 2010 and 2015" → [2010, 2015]
     - "in the 1990s" → [1990, 1999]
+    - "turn of the millennium" → [1998, 2002]
+    - "around 2000" → [1998, 2002]
     """
     years = []
+    text_lower = text.lower()
+    
+    # Fuzzy timeline patterns
+    fuzzy_patterns = [
+        (r'turn of (the )?millennium', [1998, 2002]),
+        (r'around (the )?millennium', [1998, 2002]),
+        (r'end of (the )?(\d{4})s', lambda m: [int(m.group(2)) * 10 + 8, int(m.group(2)) * 10 + 10]),
+        (r'beginning of (the )?(\d{4})s', lambda m: [int(m.group(2)) * 10, int(m.group(2)) * 10 + 2]),
+        (r'mid[- ](\d{4})s', lambda m: [int(m.group(1)) * 10 + 4, int(m.group(1)) * 10 + 6]),
+        (r'around (\d{4})', lambda m: [int(m.group(1)) - 2, int(m.group(1)) + 2]),
+    ]
+    
+    for pattern, result in fuzzy_patterns:
+        match = re.search(pattern, text_lower)
+        if match:
+            if callable(result):
+                years.extend(result(match))
+            else:
+                years.extend(result)
     
     # Match 4-digit years
     year_pattern = r'\b(19\d{2}|20\d{2})\b'
@@ -95,17 +116,32 @@ def detect_temporal_markers(text: str) -> Dict[str, bool]:
     """
     Detect temporal marker keywords in query.
     
-    Returns dict of marker types found.
+    Returns dict of marker types found, including directional operators.
     """
     text_lower = text.lower()
+    
+    # Detect directional operators with context (handles  possessives and multi-word phrases)
+    before_match = re.search(r'before\s+([\w\']+(?:\s+[\w\']+)*)', text_lower)
+    after_match = re.search(r'(?:after|since)\s+([\w\']+(?:\s+[\w\']+)*)', text_lower)
     
     markers = {
         "current": any(word in text_lower for word in ["current", "currently", "now", "today"]),
         "recent": any(word in text_lower for word in ["recent", "recently", "latest", "new"]),
         "past": any(word in text_lower for word in ["previous", "former", "old", "historical", "past"]),
-        "original": any(word in text_lower for word in ["original", "first", "initial"]),
+        "original": any(word in text_lower for word in ["original", "first", "initial", "founder", "founding"]),
         "future": any(word in text_lower for word in ["future", "upcoming", "next", "planned"]),
+        # Directional operators
+        "before": before_match is not None,
+        "after": after_match is not None,
+        "during": "during" in text_lower or "while" in text_lower,
+        "until": "until" in text_lower or "till" in text_lower,
     }
+    
+    # Store the entity/event referenced by directional operators
+    if before_match:
+        markers["before_entity"] = before_match.group(1).strip()
+    if after_match:
+        markers["after_entity"] = after_match.group(1).strip()
     
     return {k: v for k, v in markers.items() if v}
 
@@ -120,7 +156,9 @@ def classify_temporal_intent(query: str) -> Dict:
             "years": [1997, ...],  # explicit year constraints
             "decade_range": (1990, 1999) | None,
             "markers": {"current": True, ...},
-            "preference": "historical" | "current" | "future" | "specific_date" | "agnostic"
+            "preference": "historical" | "current" | "future" | "specific_date" | "agnostic",
+            "directional": "before" | "after" | "during" | None,
+            "role_seal": bool  # True if query contains inherently historical roles
         }
     """
     doc = nlp(query)
@@ -129,14 +167,47 @@ def classify_temporal_intent(query: str) -> Dict:
     years = extract_year_constraints(query)
     markers = detect_temporal_markers(query)
     
+    # Detect directional operators
+    directional = None
+    if markers.get("before"):
+        directional = "before"
+    elif markers.get("after"):
+        directional = "after"
+    elif markers.get("during"):
+        directional = "during"
+    elif markers.get("until"):
+        directional = "until"
+    
+    # Flag for EXPLICIT directional queries (has both operator AND entity)
+    # This enables strong gradients safely without breaking TempQuestions
+    explicit_directional = (
+        (directional == "before" and "before_entity" in markers) or
+        (directional == "after" and "after_entity" in markers)
+    )
+    
+    # Detect inherently historical roles (founder, first X, etc.)
+    role_seal = markers.get("original", False)
+    
     # Determine temporal preference
     preference = "agnostic"  # default
     
-    if years:
+    # Directional operators take precedence when present
+    if directional in ["before", "after"]:
+        # Keep years for alignment filtering, but note this is a directional query
+        if years:
+            preference = "specific_date"  # Will use year + directional filtering
+        else:
+            preference = "historical"  # Entity-based directional without years
+    elif years:
         preference = "specific_date"
     elif markers.get("current") or markers.get("recent"):
-        preference = "current"
-    elif markers.get("past") or markers.get("original"):
+        # Multi-marker conflict: "current" in historical context
+        if years and years[0] < datetime.now().year - 5:
+            # Historical year conflicts with "current" - treat as historical with relative "current"
+            preference = "specific_date"
+        else:
+            preference = "current"
+    elif markers.get("past") or role_seal:
         preference = "historical"
     elif markers.get("future"):
         preference = "future"
@@ -151,13 +222,19 @@ def classify_temporal_intent(query: str) -> Dict:
     decade_range = None
     if len(years) == 2 and years[1] - years[0] == 9:
         decade_range = tuple(years)
+    elif len(years) == 2 and years[1] - years[0] == 4:
+        # Fuzzy ranges like "turn of millennium" (1998-2002)
+        decade_range = tuple(years)
     
     return {
         "tense": tense,
         "years": years,
         "decade_range": decade_range,
         "markers": markers,
-        "preference": preference
+        "preference": preference,
+        "directional": directional,
+        "role_seal": role_seal,
+        "explicit_directional": explicit_directional  # NEW: Enables strong gradients safely
     }
 
 
@@ -177,7 +254,9 @@ def compute_temporal_alignment(query_intent: Dict, doc_acquired: datetime,
     Compute alignment score between query intent and document temporal signals.
     
     For specific_date queries: Boost documents where acquisition year matches query year.
-    For other intents: Use recency-based scoring.
+    For historical queries: Boost older documents over recent ones.
+    For current queries: Boost recent documents.
+    For directional queries: Apply exclusionary filtering.
     
     IMPORTANT: This assumes acquisition date = content era (true for specific_date benchmark,
     but NOT true for TempQuestions where stale docs have wrong info).
@@ -189,25 +268,55 @@ def compute_temporal_alignment(query_intent: Dict, doc_acquired: datetime,
         doc_text: Document text (for potential future content year extraction)
     
     Returns:
-        Alignment multiplier (0.85 to 1.25)
-        - 1.25: Perfect year match for specific_date queries
-        - 1.15: Close year match (within 2 years)
-        - 1.05: Acceptable match (within 5 years)
+        Alignment multiplier (0.60 to 1.30)
+        - 1.30: Perfect year match for specific_date queries
+        - 1.20: Historical boost for old docs on historical queries
+        - 1.15: Current boost for recent docs on current queries
         - 1.0: Neutral
-        - 0.95: Current preference + old doc
-        - 0.85: Poor year match for specific_date queries
+        - 0.85: Poor temporal alignment
+        - 0.60: Strong negative alignment (e.g., recent doc on historical query)
     """
     preference = query_intent["preference"]
-    query_years = query_intent["years"]
+    query_years = query_intent.get("years", [])
+    directional = query_intent.get("directional")
+    markers = query_intent.get("markers", {})
     
     doc_year = doc_acquired.year
     reference_date = doc_verified if doc_verified else doc_acquired
     days_old = (datetime.now() - reference_date).days
+    years_old = days_old / 365.25
+    
+    # Check if this is an EXPLICIT directional query (safe for strong gradients)
+    explicit_directional = query_intent.get("explicit_directional", False)
+    
+    # Entity-based directional queries - Apply STRONG gradients ONLY for explicit directional
+    # For general "historical" preference (from tense), stay neutral to protect TempQuestions
+    if explicit_directional and directional == "before" and "before_entity" in markers and not query_years:
+        # "before X" → strong gradient favoring older documents
+        # Creates differentiation: 20yo=1.40, 10yo=1.20, 5yo=1.10, 1yo=0.70
+        if years_old > 1:
+            return 1.0 + min(years_old * 0.02, 0.40)  # Linear boost, cap at +0.40
+        else:
+            return 0.70  # Strong penalty for very recent docs
+    
+    if explicit_directional and directional == "after" and "after_entity" in markers and not query_years:
+        # "after X" or "since X" → strong inverse gradient favoring newer documents  
+        # Creates differentiation: 1yo=1.40, 5yo=1.25, 31yo=0.68, 38yo=0.58
+        if years_old < 15:
+            return 1.45 - (years_old * 0.03)  # Steep gradient: newer is better
+        else:
+            return max(0.50, 1.15 - (years_old * 0.015))  # Continued gradient, low floor
     
     # Specific date preference - boost documents from matching years
     if preference == "specific_date" and query_years:
         target_year = query_years[0]
         year_distance = abs(doc_year - target_year)
+        
+        # Directional filtering for "before" and "after" with explicit years
+        if directional == "before" and doc_year >= target_year:
+            return 0.50  # Strong penalty for documents on or after the exclusion date
+        elif directional == "after" and doc_year <= target_year:
+            return 0.50  # Strong penalty for documents on or before the start date
         
         if year_distance == 0:
             return 1.30  # Perfect match - strong boost
@@ -227,8 +336,9 @@ def compute_temporal_alignment(query_intent: Dict, doc_acquired: datetime,
             return max(0.60, 1.0 - (0.08 * penalty_factor))
     
     # All other preferences: neutral (let decay system handle it)
-    # Reason: Prevents conflicts with benchmarks like TempQuestions where
-    # acquisition date != content correctness
+    # Reason: In benchmarks like TempQuestions, acquisition date ≠ content correctness
+    # Stale docs can be recent, correct docs can be old
+    # Only explicit temporal constraints (years, directional operators) warrant alignment boosts
     return 1.0
 
 

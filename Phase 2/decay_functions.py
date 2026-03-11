@@ -36,6 +36,20 @@ def is_main_clause_past(doc):
     return False
 
 
+def has_historical_role(doc):
+    """
+    Detect inherently historical roles that should be sealed regardless of tense.
+    
+    Examples: founder, first CEO, original president, etc.
+    These roles describe a historical fact even when phrased in present tense.
+    """
+    historical_role_markers = {"founder", "founding", "first", "original", "initial", "established", "created"}
+    tokens_lower = {token.text.lower() for token in doc}
+    lemmas = {token.lemma_.lower() for token in doc}
+    
+    return bool((tokens_lower | lemmas) & historical_role_markers)
+
+
 def get_category(lemmas, tokens_lower, labels):
     """Classify content category based on linguistic features"""
     checks = [
@@ -65,6 +79,7 @@ def classify_decay_rate(text):
     
     Returns decay rate (lambda) based on:
     - Tense (past tense → historical seal)
+    - **Role-based sealing** (founder, first CEO → historical seal)
     - Temporal markers (currently, now → amplified decay)
     - Entity types and keywords (institutional, geographic, etc.)
     - **Compositional contamination** (zero-decay fragility)
@@ -87,10 +102,18 @@ def classify_decay_rate(text):
     )
 
     has_temporal_present = bool(tokens_lower & TEMPORAL_MARKERS)
+    
+    # Role-based sealing: "founder", "first CEO", etc. are inherently historical
+    has_hist_role = has_historical_role(doc)
 
-    # Historical seal only for permanent historical facts with explicit date anchors
-    # NOT for simple past tense like "served as CEO" (which is an outdated temporal fact)
+    # Historical seal for:
+    # 1. Permanent historical facts with explicit date anchors (existing logic)
+    # 2. Inherently historical roles (NEW: Gemini Case D)
     if has_historical_anchor and is_past_tense and not has_temporal_present:
+        return HISTORICAL_SEAL
+    
+    if has_hist_role and not has_temporal_present:
+        # "Who is the founder?" → sealed, despite present tense
         return HISTORICAL_SEAL
 
     # 2. Get base category rate
