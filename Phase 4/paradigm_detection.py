@@ -30,54 +30,119 @@ PARADIGM_QUALIFIERS = {
 }
 
 # Known theoretical frameworks and their domains
+# EXPANDED per Deepseek's recommendation: use word vectors or small classifier
 KNOWN_PARADIGMS = {
     # Physics paradigms
     "newtonian": ["newtonian mechanics", "newtonian physics", "classical mechanics", 
-                  "newton's laws", "classical physics"],
+                  "newton's laws", "classical physics", "newtonian dynamics"],
     "relativistic": ["relativity", "special relativity", "general relativity", 
-                     "einstein's theory", "relativistic physics"],
+                     "einstein's theory", "relativistic physics", "relativistic mechanics",
+                     "special theory of relativity", "general theory of relativity"],
     "quantum": ["quantum mechanics", "quantum physics", "quantum theory", 
-                "quantum field theory", "qm"],
+                "quantum field theory", "qm", "quantum dynamics", "wave mechanics",
+                "matrix mechanics", "quantum electrodynamics", "qed"],
+    "thermodynamics": ["thermodynamics", "statistical mechanics", "thermal physics",
+                       "heat transfer", "entropy", "thermodynamic equilibrium"],
     
     # Mathematics paradigms  
-    "euclidean": ["euclidean geometry", "euclidean space", "flat geometry"],
+    "euclidean": ["euclidean geometry", "euclidean space", "flat geometry", 
+                  "plane geometry", "euclid's geometry"],
     "non_euclidean": ["non-euclidean geometry", "hyperbolic geometry", 
-                      "elliptic geometry", "curved space"],
+                      "elliptic geometry", "curved space", "riemannian geometry",
+                      "spherical geometry"],
     "standard_math": ["standard mathematics", "classical mathematics", 
                       "conventional math", "traditional mathematics"],
+    "set_theory": ["set theory", "zermelo-fraenkel", "zfc", "axiomatic set theory"],
+    "category_theory": ["category theory", "categorical", "functors", "morphisms"],
+    "constructive_math": ["constructive mathematics", "intuitionism", "constructivism"],
     
     # Economics paradigms
     "neoclassical": ["neoclassical economics", "neoclassical theory", 
-                     "rational actor model"],
-    "keynesian": ["keynesian economics", "keynesian theory", "keynes"],
-    "austrian": ["austrian economics", "austrian school"],
+                     "rational actor model", "utility maximization"],
+    "keynesian": ["keynesian economics", "keynesian theory", "keynes", 
+                  "neo-keynesian", "new keynesian"],
+    "austrian": ["austrian economics", "austrian school", "praxeology"],
+    "marxian": ["marxian economics", "marxist economics", "marx", "dialectical materialism"],
+    "behavioral": ["behavioral economics", "behavioral finance", "prospect theory"],
     
     # Biology/Medicine paradigms
-    "germ_theory": ["germ theory", "infectious disease model"],
-    "evolutionary": ["evolutionary theory", "darwinian evolution", "natural selection"],
+    "germ_theory": ["germ theory", "infectious disease model", "pathogen theory"],
+    "evolutionary": ["evolutionary theory", "darwinian evolution", "natural selection",
+                     "modern synthesis", "neo-darwinism"],
+    "cell_theory": ["cell theory", "cellular biology", "cytology"],
+    "genetics": ["mendelian genetics", "molecular genetics", "genomics"],
     
     # Philosophy paradigms
-    "empiricist": ["empiricism", "empirical philosophy"],
-    "rationalist": ["rationalism", "rationalist philosophy"],
-    "materialist": ["materialism", "physicalism"],
-    "idealist": ["idealism", "idealist philosophy"],
+    "empiricist": ["empiricism", "empirical philosophy", "sensory experience"],
+    "rationalist": ["rationalism", "rationalist philosophy", "innate ideas"],
+    "materialist": ["materialism", "physicalism", "physical monism"],
+    "idealist": ["idealism", "idealist philosophy", "mental monism"],
+    "pragmatist": ["pragmatism", "pragmatic philosophy", "practical consequences"],
+    "phenomenology": ["phenomenology", "phenomenological", "lived experience"],
+    "existentialism": ["existentialism", "existentialist philosophy"],
     
     # Computer Science paradigms
     "procedural": ["procedural programming", "imperative programming"],
-    "functional": ["functional programming", "fp"],
+    "functional": ["functional programming", "fp", "lambda calculus", "pure functions"],
     "object_oriented": ["object-oriented programming", "oop", "object oriented"],
+    "declarative": ["declarative programming", "logic programming", "prolog"],
+    
+    # Law/Legal paradigms
+    "common_law": ["common law", "case law", "precedent-based"],
+    "civil_law": ["civil law", "code-based law", "statutory law"],
+    "constitutional": ["constitutional law", "constitutional framework"],
+    
+    # Psychology paradigms
+    "behaviorist": ["behaviorism", "behavioral psychology", "stimulus-response"],
+    "cognitive": ["cognitive psychology", "information processing", "cognitivism"],
+    "psychoanalytic": ["psychoanalysis", "psychoanalytic theory", "freudian"],
+    "humanistic": ["humanistic psychology", "self-actualization"],
+    
+    # Sociology paradigms
+    "functionalist": ["structural functionalism", "functionalist sociology"],
+    "conflict": ["conflict theory", "marxist sociology"],
+    "symbolic_interactionist": ["symbolic interactionism", "interactionist"],
 }
 
 # Framework-specific terminology that implies paradigm scope
+# EXPANDED per Deepseek's recommendation
 PARADIGM_TERMS = {
     "newtonian": {"inertia", "momentum", "gravitational constant", "absolute time", 
-                  "absolute space", "galilean transformation"},
+                  "absolute space", "galilean transformation", "action-reaction",
+                  "conservation of momentum", "force equals mass times acceleration"},
     "relativistic": {"spacetime", "light cone", "time dilation", "length contraction",
-                     "lorentz transformation", "invariant mass", "c"},
+                     "lorentz transformation", "invariant mass", "c", "speed of light",
+                     "proper time", "worldline", "minkowski space", "covariant"},
     "quantum": {"wave function", "uncertainty principle", "superposition", "entanglement",
-                "quantization", "planck constant", "eigenstate", "observable"},
-    "euclidean": {"parallel postulate", "straight line", "flat plane", "pythagorean"},
-    "non_euclidean": {"geodesic", "curvature", "hyperbolic", "elliptic", "riemann"},
+                "quantization", "planck constant", "eigenstate", "observable", 
+                "hamiltonian", "schrödinger", "heisenberg", "wave-particle duality",
+                "quantum state", "measurement problem", "decoherence", "spin"},
+    "thermodynamics": {"entropy", "enthalpy", "gibbs free energy", "carnot cycle",
+                       "second law", "boltzmann", "partition function", "heat engine"},
+    "euclidean": {"parallel postulate", "straight line", "flat plane", "pythagorean",
+                  "angles sum to 180", "euclid", "planar"},
+    "non_euclidean": {"geodesic", "curvature", "hyperbolic", "elliptic", "riemann",
+                      "gaussian curvature", "parallel transport"},
+    "set_theory": {"axiom of choice", "power set", "ordinal", "cardinal", "zfc"},
+    "category_theory": {"functor", "natural transformation", "morphism", "commutative diagram"},
+    "neoclassical": {"utility function", "marginal utility", "equilibrium", "supply and demand",
+                     "rational expectations", "pareto efficiency"},
+    "keynesian": {"aggregate demand", "multiplier effect", "liquidity trap", "sticky prices",
+                  "animal spirits", "propensity to consume"},
+    "austrian": {"praxeology", "subjective value", "time preference", "catallactics"},
+    "evolutionary": {"natural selection", "fitness", "adaptation", "mutation", "speciation",
+                     "common descent", "gene pool", "allele frequency"},
+    "genetics": {"mendelian", "dominant", "recessive", "genotype", "phenotype", "dna", 
+                 "gene expression", "allele"},
+    "behaviorist": {"stimulus", "response", "conditioning", "reinforcement", "punishment",
+                    "operant", "pavlovian"},
+    "cognitive": {"schema", "semantic network", "working memory", "encoding", "retrieval"},
+    "psychoanalytic": {"unconscious", "id", "ego", "superego", "defense mechanism", 
+                       "repression", "transference"},
+    "functional_prog": {"pure function", "immutable", "lambda", "higher-order function",
+                        "map", "reduce", "fold", "monad"},
+    "object_oriented": {"class", "inheritance", "polymorphism", "encapsulation", "abstraction",
+                        "interface", "method"},
 }
 
 

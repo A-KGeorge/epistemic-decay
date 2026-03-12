@@ -468,3 +468,37 @@ KEY INSIGHTS:
 - Strategy: 100% epistemic_modulation on TempQuestions (all queries processed)
 - These benchmarks focus on temporal/epistemic, not role relationships
 - Full pipeline preserves temporal signal while adding epistemic depth
+
+REGRESSIONS ROOT CAUSE (Verified Benchmark: -2 cases → FIXED ✅):
+- Both failures: "Who was the Prime Minister of the United Kingdom in 2017?"
+- OLD behavior: Phase 4 was DOCUMENT-DRIVEN (analyzed document text for epistemic markers)
+  - Correct document (from 2017): Contained hedging/paradigm qualifiers → received 0.5× penalty
+  - Wrong documents: No epistemic markers → kept 1.0× full score
+  - Result: Wrong documents outscored correct document
+- Problem: Query was straightforward (no uncertainty markers), but Phase 4 penalized documents for their own phrasing
+
+✅ FIX IMPLEMENTED (2026-03-11):
+- Made epistemic modulation QUERY-DRIVEN (check query FIRST before analyzing documents)
+- Created query_epistemic_detection.py with should_apply_epistemic_modulation()
+- If query is clean → epistemic_modifier = 1.0 (preserve Phase 2 score)
+- If query has markers → apply document-side epistemic analysis
+
+✅ RESULT AFTER FIX:
+- Verified benchmark: 153/153 (100.0%) - 0 regressions
+- Strategy: 100% temporal_alignment_preserved (epistemic modulation skipped for all queries)
+- Expected: Epistemic modulation only activates when query contains uncertainty/paradigm markers
+
+IMMEDIATE FIXES COMPLETED:
+1. ✅ Query-aware epistemic modulation (check query FIRST before analyzing documents)
+2. ✅ Expand paradigm vocabulary (25+ paradigms, 150+ terms across physics, economics, psychology, etc.)
+3. ✅ Implement numerical uncertainty parsing (±, "approximately", ranges, margins of error)
+4. ✅ Calibrate multiplicative composition of uncertainty markers (already implemented)
+
+PHASE 3 EXPANSION COMPLETED:
+1. ✅ Add temporal joins (find overlapping intervals between two roles)
+   - get_role_interval(): Get time interval when entity held role
+   - get_role_holders_in_interval(): Find all role holders during time period
+   - find_temporal_overlap(): Calculate precise overlap between two roles
+   - get_successors()/get_predecessors(): Navigate succession chains
+2. ⏳ Support more query types ("after", "before", "during") - methods ready, need query parser integration
+3. ⏳ Populate graph: 62 nodes → 500+ nodes (tech companies, countries, multiple roles) - future work

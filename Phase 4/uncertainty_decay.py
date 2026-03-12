@@ -159,42 +159,99 @@ def detect_numerical_uncertainty(text: str) -> List[Tuple[str, float]]:
     """
     Detect uncertainty from numerical expressions.
     
+    Enhanced with Deepseek's recommendations:
+    - Expanded patterns for ±, approximately, around, nearly
+    - Better range detection (X-Y, X to Y, between X and Y)
+    - Margin of error and confidence interval detection
+    
     Patterns:
     - Ranges: "5-10 billion years" → moderate uncertainty
     - Plus/minus: "±10%" → quantified uncertainty  
-    - Approximations: "~5 billion" → moderate uncertainty
+    - Approximations: "~5 billion", "around 10", "nearly 100" → moderate uncertainty
     - Orders of magnitude: "millions" vs "5.2 million" → precision difference
     
     Returns:
         List of (pattern_type, confidence) tuples
     """
     uncertainties = []
+    text_lower = text.lower()
     
-    # Pattern 1: Plus/minus notation "±X%"
-    pm_pattern = r'±\s*(\d+(?:\.\d+)?)\s*%'
+    # Pattern 1: Plus/minus notation "±X" or "±X%"
+    pm_pattern = r'[±]\s*(\d+(?:\.\d+)?)\s*%?'
     for match in re.finditer(pm_pattern, text):
-        error_pct = float(match.group(1))
-        confidence = max(0.5, 1.0 - (error_pct / 100))
-        uncertainties.append((f"±{error_pct}%", confidence))
+        value = match.group(1)
+        error_pct = float(value)
+        # Assume % if < 100, otherwise absolute
+        if error_pct <= 100 and '%' in match.group(0):
+            confidence = max(0.5, 1.0 - (error_pct / 100))
+        else:
+            confidence = 0.8  # Absolute error, moderate uncertainty
+        uncertainties.append((f"±{value}", confidence))
     
-    # Pattern 2: Ranges "X-Y" or "between X and Y"
-    range_pattern = r'(\d+(?:\.\d+)?)\s*[-–to]\s*(\d+(?:\.\d+)?)'
-    for match in re.finditer(range_pattern, text):
-        low = float(match.group(1))
-        high = float(match.group(2))
-        if high > 0:
-            range_width = (high - low) / high
-            confidence = max(0.6, 1.0 - range_width)
-            uncertainties.append((f"range:{low}-{high}", confidence))
+    # Pattern 1b: "plus or minus X"
+    pm_text_pattern = r'plus\s+or\s+minus\s+(\d+(?:\.\d+)?)\s*%?'
+    for match in re.finditer(pm_text_pattern, text_lower):
+        value = match.group(1)
+        uncertainties.append((f"plus_or_minus_{value}", 0.8))
     
-    # Pattern 3: Approximation symbols "~", "≈", "approximately"
-    if '~' in text or '≈' in text or 'approximately' in text.lower():
-        uncertainties.append(("approximation", 0.85))
+    # Pattern 2: Ranges "X-Y", "X to Y", "between X and Y"
+    range_patterns = [
+        r'(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)',  # X-Y or X–Y
+        r'(\d+(?:\.\d+)?)\s+to\s+(\d+(?:\.\d+)?)',  # X to Y
+        r'between\s+(\d+(?:\.\d+)?)\s+and\s+(\d+(?:\.\d+)?)',  # between X and Y
+        r'from\s+(\d+(?:\.\d+)?)\s+to\s+(\d+(?:\.\d+)?)',  # from X to Y
+    ]
+    
+    for pattern in range_patterns:
+        for match in re.finditer(pattern, text_lower):
+            low = float(match.group(1))
+            high = float(match.group(2))
+            if high > 0 and high > low:
+                range_width = (high - low) / high
+                confidence = max(0.6, 1.0 - range_width)
+                uncertainties.append((f"range:{low}-{high}", confidence))
+    
+    # Pattern 3: Approximation symbols and words "~", "≈", "approximately", "around", "about"
+    approx_patterns = {
+        r'[~≈]': ("~symbol", 0.85),
+        r'\b(approximately|roughly)\b': ("approximately", 0.85),
+        r'\baround\b': ("around", 0.85),
+        r'\babout\b': ("about", 0.85),
+        r'\bnearly\b': ("nearly", 0.88),
+        r'\balmost\b': ("almost", 0.88),
+        r'\bclose\s+to\b': ("close_to", 0.87),
+        r'\bcirca\b': ("circa", 0.80),
+        r'\bapprox\.?\b': ("approx", 0.85),
+    }
+    
+    for pattern, (name, conf) in approx_patterns.items():
+        if re.search(pattern, text_lower):
+            uncertainties.append((name, conf))
     
     # Pattern 4: Vague magnitudes "millions", "billions" (no specific number)
     vague_magnitude = r'\b(millions|billions|trillions|thousands)\b(?!\s+of\s+\d)'
-    if re.search(vague_magnitude, text.lower()):
+    if re.search(vague_magnitude, text_lower):
         uncertainties.append(("vague_magnitude", 0.7))
+    
+    # Pattern 5: Margin of error and confidence intervals (Deepseek recommendation)
+    if re.search(r'\bmargin\s+of\s+error\b', text_lower):
+        uncertainties.append(("margin_of_error", 0.75))
+    
+    if re.search(r'\bconfidence\s+interval\b', text_lower):
+        uncertainties.append(("confidence_interval", 0.75))
+    
+    if re.search(r'\berror\s+bar', text_lower):
+        uncertainties.append(("error_bar", 0.75))
+    
+    # Pattern 6: "up to X", "as many as X", "as much as X" (upper bound uncertainty)
+    upper_bound_pattern = r'\b(up\s+to|as\s+many\s+as|as\s+much\s+as|at\s+most)\b'
+    if re.search(upper_bound_pattern, text_lower):
+        uncertainties.append(("upper_bound", 0.80))
+    
+    # Pattern 7: "at least X", "no less than X" (lower bound uncertainty)
+    lower_bound_pattern = r'\b(at\s+least|no\s+less\s+than|minimum\s+of)\b'
+    if re.search(lower_bound_pattern, text_lower):
+        uncertainties.append(("lower_bound", 0.80))
     
     return uncertainties
 

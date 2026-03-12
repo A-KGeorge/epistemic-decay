@@ -131,7 +131,40 @@ Current benchmarks focus on **temporal/epistemic queries**, not **role successio
 
 ### Production Recommendations
 
-**Add Role Succession Benchmark** to test Phase 3 effectiveness:
+**1. Add Temporal Joins** (CRITICAL for complex queries)
+
+Enable queries that require finding overlapping time intervals between two roles:
+
+```python
+# Query: "Who was US President while Steve Jobs was CEO of Apple?"
+# Implementation:
+apple_ceo_interval = graph.get_role_interval("Apple", "CEO", "Steve Jobs")  # [1997, 2011]
+us_president_candidates = graph.get_role_holders_in_interval("United States", "President", [1997, 2011])
+# Returns: Bill Clinton [1993-2001], George W. Bush [2001-2009], Barack Obama [2009-2017]
+# Compute overlap: Clinton (4 years), Bush (8 years), Obama (2 years)
+# Answer: George W. Bush (longest overlap)
+```
+
+**2. Expand Query Type Support**
+
+Add methods for more temporal query patterns:
+
+- `"after"`: `get_successors(entity, role, org)` → return all successors
+- `"before"`: `get_predecessors(entity, role, org)` → return all predecessors
+- `"during"`: `get_role_holders_in_interval(org, role, [start, end])` → temporal join
+- `"since"`: `get_role_holders_since(org, role, date)` → filter by start date ≥ date
+- `"until"`: `get_role_holders_until(org, role, date)` → filter by end date ≤ date
+
+**3. Populate Graph**
+
+- **Current**: 62 nodes (entities + roles + successions from benchmark)
+- **Target**: 500+ nodes covering:
+  - **Tech companies**: Microsoft, Google, Amazon, Apple, Meta, Netflix, Twitter, Tesla
+  - **Countries**: US, UK, France, Germany, Canada, Australia, India, Japan, China
+  - **Roles**: President, PM, CEO, CFO, CTO, Founder, Mayor, Governor, Secretary
+- **Sources**: Wikidata SPARQL, DBpedia, manual curation for high-value entities
+
+**4. Add Role Succession Benchmark** to test Phase 3 effectiveness:
 
 ```json
 {
@@ -139,14 +172,21 @@ Current benchmarks focus on **temporal/epistemic queries**, not **role successio
   "doc1": { "text": "Tim Cook became CEO in 2011", "entity": "Tim Cook" },
   "doc2": { "text": "John Sculley was CEO in 1985", "entity": "John Sculley" },
   "expected": "doc1"
+},
+{
+  "query": "Who was US President while Steve Jobs was CEO of Apple?",
+  "doc1": { "text": "Bill Clinton was President 1993-2001", "entity": "Bill Clinton" },
+  "doc2": { "text": "George W. Bush was President 2001-2009", "entity": "George W. Bush" },
+  "expected": "doc2"  // Longest overlap with Jobs tenure [1997-2011]
 }
 ```
 
 **Expected Phase 3 behavior**:
 
-- Graph detects succession: Steve Jobs → Tim Cook (EXACT match, confidence = 1.0)
-- Phase 3 overrides Phase 4 score with graph-based structural match
-- Correctly retrieves Tim Cook even if embeddings favor John Sculley
+- **Succession queries**: Graph detects succession (Steve Jobs → Tim Cook), confidence = 1.0 (EXACT)
+- **Temporal joins**: Find interval overlap, rank by intersection length
+- **Override**: Phase 3 replaces Phase 4 score with graph-based structural match
+- **Robustness**: Correctly retrieves answer even if embeddings favor wrong candidate
 
 **Example:**
 

@@ -207,22 +207,55 @@ uncertainty_modulation:         1 ( 0.7%)  ← Uncertainty dominates
 
 **Verified Benchmark: -2 cases (100.0% → 98.7%)**
 
-Both failures are **Prime Minister of United Kingdom in 2017** queries where Phase 4 applied **paradigm scoping** with arbitrary threshold `λp = 0.5`, penalizing temporally-correct answers.
+Both failures are **Prime Minister of United Kingdom in 2017** queries where Phase 4 applied an **unjustified epistemic penalty** (0.5×) to the correct document.
 
-**Root Cause**: Epistemic constants (paradigm validity threshold, uncertainty modulation strength) were **arbitrarily chosen** without hyperparameter tuning.
+**Root Cause**: Epistemic modulation is **document-driven** instead of **query-driven**
 
-**Production Solution**:
+- **Query**: "Who was the Prime Minister of the United Kingdom in 2017?" (clean, no uncertainty/paradigm markers)
+- **Correct document** (from 2017): Received **0.5× epistemic penalty** because the document text itself contained hedging or paradigm qualifiers
+- **Wrong documents**: Kept **1.0× full score** (no epistemic markers in their text)
+- **Problem**: Phase 4 analyzed document content for uncertainty markers and applied penalties even when the query was straightforward
+- **Impact**: Penalizes well-sourced documents that cite frameworks or acknowledge uncertainty, even for simple factual queries
 
-1. **Grid search** over λp thresholds: `{0.3, 0.5, 0.7, 0.9}` to minimize false rejections
-2. **Validation split**: Hold out 20% of verified benchmark for hyperparameter tuning
-3. **A/B test**: Phase 4 ON vs OFF on production queries to measure impact
-4. **Conservative defaults**: When uncertain, preserve Phase 2 temporal alignment (epistemic_modifier >= 0.95)
+**The Fix**: Make epistemic modulation **query-aware**
 
-**Expected Post-Tuning**:
+Epistemic modulation should only activate when the **query** contains corresponding markers:
 
-- Verified: 98.7% → **99.3-100.0%** (reduce false paradigm rejections)
+- If query is clean (no markers) → `epistemic_modifier = 1.0` (preserve Phase 2 score)
+- If query has markers → analyze documents for epistemic confidence
+
+**Examples**:
+
+- ✅ Query: "Who was PM in 2017?" → **No epistemic analysis** (straightforward temporal query)
+- ✅ Query: "Who was probably PM in 2017?" → **Apply uncertainty modulation** (query requests uncertainty)
+- ✅ Query: "According to British constitutional law, who was PM?" → **Apply paradigm scoping** (query specifies framework)
+
+**Immediate Fixes** (Phase 4):
+
+1. **Make epistemic modulation query-aware** (CRITICAL):
+
+   ```python
+   # Check query for epistemic markers FIRST
+   query_has_uncertainty = detect_uncertainty_markers(query)  # "probably", "might", "approximately", "±"
+   query_has_paradigm = detect_paradigm_qualifiers(query)     # "according to", "in [theory]", "under [framework]"
+
+   if not (query_has_uncertainty or query_has_paradigm):
+       epistemic_modifier = 1.0  # Preserve Phase 2 score
+   else:
+       # Apply document-side epistemic analysis
+       epistemic_modifier = compute_epistemic_decay(doc, query)
+   ```
+
+2. **Expand paradigm vocabulary**: Use word vectors or small classifier beyond keyword matching
+3. **Implement numerical uncertainty parsing**: Regex for `±`, "approximately", "around", ranges
+4. **Calibrate multiplicative composition**: Tune how multiple uncertainty markers combine (currently multiplies all)
+
+**Expected Post-Fix**:
+
+- Verified: 98.7% → **100.0%** (query-aware epistemic modulation eliminates false penalties)
 - Edge cases: 53.3% → **60.0%+** (better uncertainty calibration)
-- Epistemic: 63.3% → **70.0%+** (paradigm detection improvements)
+- Epistemic standalone: 63.3% → **70.0%+** (paradigm detection + numerical uncertainty parsing)
+- TempQuestions: 92.1% → **92.1%+** (maintain 0 regressions, potential rescues on uncertainty queries)
 
 ### Phase 3 Graph Results
 

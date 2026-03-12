@@ -202,34 +202,62 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         # These should MULTIPLY Phase 2's score, not replace it
         from multi_dimensional_decay import analyze_statement_decay, compute_final_confidence
         from paradigm_detection import extract_paradigm_context
+        from query_epistemic_detection import should_apply_epistemic_modulation
         
-        # Analyze documents for epistemic decay
-        doc1_decay = analyze_statement_decay(doc1["text"], doc1_acquired)
-        doc2_decay = analyze_statement_decay(doc2["text"], doc2_acquired)
+        # ===== CRITICAL FIX: Query-aware epistemic modulation =====
+        # Only apply epistemic analysis if QUERY contains epistemic markers
+        query_epistemic_check = should_apply_epistemic_modulation(query)
         
-        # Extract query paradigm context
-        query_paradigm_ctx = extract_paradigm_context(query)
-        query_paradigm_set = query_paradigm_ctx["paradigm_set"]
-        
-        # Compute full confidence scores (including temporal)
-        now = datetime.now()
-        doc1_days = (now - doc1_acquired).days
-        doc2_days = (now - doc2_acquired).days
-        
-        doc1_confidence = compute_final_confidence(doc1_decay, doc1_days, query_paradigm_set)
-        doc2_confidence = compute_final_confidence(doc2_decay, doc2_days, query_paradigm_set)
-        
-        # Extract ONLY epistemic components (exclude temporal since Phase 2 handles it)
-        doc1_epistemic = (
-            doc1_confidence["component_scores"]["paradigm"] *
-            doc1_confidence["component_scores"]["uncertainty"] *
-            doc1_confidence["component_scores"]["dependency"]
-        )
-        doc2_epistemic = (
-            doc2_confidence["component_scores"]["paradigm"] *
-            doc2_confidence["component_scores"]["uncertainty"] *
-            doc2_confidence["component_scores"]["dependency"]
-        )
+        if not query_epistemic_check["apply_epistemic"]:
+            # Query is clean (no uncertainty/paradigm markers)
+            # Preserve Phase 2 score - don't penalize documents for their phrasing
+            doc1_epistemic = 1.0
+            doc2_epistemic = 1.0
+            strategy = "temporal_alignment_preserved"
+        else:
+            # Query has epistemic markers - apply document-side epistemic analysis
+            # Analyze documents for epistemic decay
+            doc1_decay = analyze_statement_decay(doc1["text"], doc1_acquired)
+            doc2_decay = analyze_statement_decay(doc2["text"], doc2_acquired)
+            
+            # Extract query paradigm context
+            query_paradigm_ctx = extract_paradigm_context(query)
+            query_paradigm_set = query_paradigm_ctx["paradigm_set"]
+            
+            # Compute full confidence scores (including temporal)
+            now = datetime.now()
+            doc1_days = (now - doc1_acquired).days
+            doc2_days = (now - doc2_acquired).days
+            
+            doc1_confidence = compute_final_confidence(doc1_decay, doc1_days, query_paradigm_set)
+            doc2_confidence = compute_final_confidence(doc2_decay, doc2_days, query_paradigm_set)
+            
+            # Extract ONLY epistemic components (exclude temporal since Phase 2 handles it)
+            doc1_epistemic = (
+                doc1_confidence["component_scores"]["paradigm"] *
+                doc1_confidence["component_scores"]["uncertainty"] *
+                doc1_confidence["component_scores"]["dependency"]
+            )
+            doc2_epistemic = (
+                doc2_confidence["component_scores"]["paradigm"] *
+                doc2_confidence["component_scores"]["uncertainty"] *
+                doc2_confidence["component_scores"]["dependency"]
+            )
+            
+            # Determine strategy based on which dimension had the most impact
+            if doc1_decay.is_zero_decay or doc2_decay.is_zero_decay:
+                strategy = "zero_decay"
+            elif doc1_confidence["paradigm_valid"] == False or doc2_confidence["paradigm_valid"] == False:
+                strategy = "paradigm_rejection"
+            elif abs(doc1_epistemic - doc2_epistemic) > 0.2:
+                # Significant epistemic difference
+                if doc1_decay.uncertainty < 0.8 or doc2_decay.uncertainty < 0.8:
+                    strategy = "uncertainty_modulation"
+                else:
+                    strategy = "epistemic_modulation"
+            else:
+                # Epistemic modifiers didn't change much, temporal alignment dominated
+                strategy = "temporal_alignment_preserved"
         
         # PHASE 4 INTEGRATED: Phase 2 score × Phase 4 epistemic modifiers
         doc1_sim_phase4 = doc1_sim_phase2 * doc1_epistemic
@@ -237,38 +265,6 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         
         phase4_winner = doc2_key if doc2_sim_phase4 > doc1_sim_phase4 else doc1_key
         phase4_correct = (phase4_winner == expected)
-        
-        # Determine strategy based on which dimension had the most impact
-        if doc1_decay.is_zero_decay or doc2_decay.is_zero_decay:
-            strategy = "zero_decay"
-        elif doc1_confidence["paradigm_valid"] == False or doc2_confidence["paradigm_valid"] == False:
-            strategy = "paradigm_rejection"
-        elif abs(doc1_epistemic - doc2_epistemic) > 0.2:
-            # Significant epistemic difference
-            if doc1_decay.uncertainty < 0.8 or doc2_decay.uncertainty < 0.8:
-                strategy = "uncertainty_modulation"
-            else:
-                strategy = "epistemic_modulation"
-        else:
-            # Epistemic modifiers didn't change much, temporal alignment dominated
-            strategy = "temporal_alignment_preserved"
-        # Determine strategy based on which dimension had the most impact
-        doc1_modifier = doc1_confidence["final_confidence"]
-        doc2_modifier = doc2_confidence["final_confidence"]
-        
-        if doc1_decay.is_zero_decay or doc2_decay.is_zero_decay:
-            strategy = "zero_decay"
-        elif doc1_confidence["paradigm_valid"] == False or doc2_confidence["paradigm_valid"] == False:
-            strategy = "paradigm_rejection"
-        elif abs(doc1_modifier - doc2_modifier) > 0.2:
-            # Significant epistemic difference
-            if doc1_decay.uncertainty < 0.8 or doc2_decay.uncertainty < 0.8:
-                strategy = "uncertainty_modulation"
-            else:
-                strategy = "epistemic_modulation"
-        else:
-            # Epistemic modifiers didn't change much, temporal alignment dominated
-            strategy = "temporal_alignment_preserved"
         
         strategy_distribution[strategy] = strategy_distribution.get(strategy, 0) + 1
         

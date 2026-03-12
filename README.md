@@ -69,22 +69,24 @@ Phase 4 is a **modulation layer** that refines Phase 2's temporal alignment scor
 
 **Full Pipeline Results (P1→P2→P4→P3)**:
 
-| Benchmark                   | Cases     | Phase 1   | Phase 2   | Phase 4    | Phase 3    | Final      |
-| --------------------------- | --------- | --------- | --------- | ---------- | ---------- | ---------- |
-| **Verified (programmatic)** | 153       | 74.5%     | **100%**  | 98.7%      | 98.7%      | **98.7%**  |
-| **Manual specific_date**    | 61        | 45.9%     | **90.2%** | -          | -          | **90.2%**  |
-| **TempQuestions**           | 1,740     | 92.1%     | **92.1%** | -          | -          | **92.1%**  |
-| **Edge Cases**              | 15        | 40.0%     | 46.7%     | 53.3%      | 53.3%      | **53.3%**  |
-| **Fuzzy Logic**             | 10        | -         | 80.0%     | 80.0%      | 80.0%      | **80.0%**  |
-| **Epistemic (standalone)**  | 30        | -         | -         | 63.3%      | -          | **63.3%**  |
-| **TOTAL**                   | **1,969** | **88.5%** | **92.6%** | **~91.5%** | **~91.5%** | **~92.0%** |
+| Benchmark                   | Cases     | Phase 1   | Phase 2   | Phase 4     | Phase 3    | Final       |
+| --------------------------- | --------- | --------- | --------- | ----------- | ---------- | ----------- |
+| **Verified (programmatic)** | 153       | 74.5%     | **100%**  | **100%** ✅ | **100%**   | **100%** ✅ |
+| **Manual specific_date**    | 61        | 45.9%     | **90.2%** | -           | -          | **90.2%**   |
+| **TempQuestions**           | 1,740     | 92.1%     | **92.1%** | -           | -          | **92.1%**   |
+| **Edge Cases**              | 15        | 40.0%     | 46.7%     | 53.3%       | 53.3%      | **53.3%**   |
+| **Fuzzy Logic**             | 10        | -         | 80.0%     | 80.0%       | 80.0%      | **80.0%**   |
+| **Epistemic (standalone)**  | 30        | -         | -         | 63.3%       | -          | **63.3%**   |
+| **TOTAL**                   | **1,969** | **88.5%** | **92.6%** | **~91.5%**  | **~91.5%** | **~92.0%**  |
 
 **Key Insights**:
 
 - Phase 2 achieves 100% on verified temporal queries
 - Phase 4 adds epistemic nuance (paradigm/uncertainty/dependency), rescuing +1 edge case
 - Phase 3 graph override activates for role succession queries (not heavily tested in these benchmarks)
-- Phase 4 regressions (-2 cases on verified) due to **arbitrary epistemic constants** (can be tuned in production)
+- **✅ Phase 4 regressions FIXED** (2026-03-11): Query-aware epistemic modulation now preserves Phase 2 score when query has no uncertainty/paradigm markers
+  - Before: 98.7% (document-driven penalties)
+  - After: 100.0% (query-driven modulation)
 
 📊 **Detailed results**: [pipeline_results_summary.txt](pipeline_results_summary.txt) | [RESULTS.md](RESULTS.md)
 

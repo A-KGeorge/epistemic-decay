@@ -410,6 +410,227 @@ class TemporalKnowledgeGraph:
         
         return graph
     
+    # ===== TEMPORAL JOIN METHODS (Deepseek recommendation) =====
+    
+    def get_role_interval(self, org: str, role: str, entity: str) -> Optional[Tuple[datetime, Optional[datetime]]]:
+        """
+        Get the time interval when a specific entity held a role at an organization.
+        
+        Args:
+            org: Organization name (e.g., "Apple")
+            role: Position title (e.g., "CEO")
+            entity: Person name (e.g., "Steve Jobs")
+            
+        Returns:
+            Tuple of (start_date, end_date) or None if not found
+            end_date is None if role is current
+            
+        Example:
+            interval = graph.get_role_interval("Apple", "CEO", "Steve Jobs")
+            # Returns (datetime(1997, 7, 9), datetime(2011, 8, 24))
+        """
+        for node_id in self.graph.nodes():
+            node_data = self.graph.nodes[node_id]
+            
+            if node_data.get("type") != "ROLE":
+                continue
+            
+            if (node_data.get("org") == org and 
+                node_data.get("role") == role and 
+                node_data.get("entity") == entity):
+                return (node_data.get("start_date"), node_data.get("end_date"))
+        
+        return None
+    
+    def get_role_holders_in_interval(self, org: str, role: str, 
+                                     interval: Tuple[datetime, datetime]) -> List[Dict]:
+        """
+        Find all entities who held a role during a specified time interval.
+        
+        This enables temporal joins: e.g., "Who was US President while Steve Jobs was CEO?"
+        
+        Args:
+            org: Organization name (e.g., "United States")
+            role: Position title (e.g., "President")
+            interval: Tuple of (start_date, end_date) to query
+            
+        Returns:
+            List of dicts with {entity, start_date, end_date, overlap_years}
+            sorted by overlap duration (longest first)
+            
+        Example:
+            jobs_interval = graph.get_role_interval("Apple", "CEO", "Steve Jobs")
+            presidents = graph.get_role_holders_in_interval("United States", "President", jobs_interval)
+            # Returns: [
+            #   {"entity": "George W. Bush", "start": 2001-01-20, "end": 2009-01-20, "overlap_years": 8},
+            #   {"entity": "Bill Clinton", "start": 1993-01-20, "end": 2001-01-20, "overlap_years": 4},
+            #   {"entity": "Barack Obama", "start": 2009-01-20, "end": 2017-01-20, "overlap_years": 2}
+            # ]
+        """
+        query_start, query_end = interval
+        
+        if query_start is None:
+            return []
+        
+        # Treat None as far future for query end
+        query_end_check = query_end if query_end else datetime(9999, 12, 31)
+        
+        holders = []
+        
+        for node_id in self.graph.nodes():
+            node_data = self.graph.nodes[node_id]
+            
+            if node_data.get("type") != "ROLE":
+                continue
+                
+            if node_data.get("org") != org or node_data.get("role") != role:
+                continue
+            
+            role_start = node_data.get("start_date")
+            role_end = node_data.get("end_date")
+            
+            if role_start is None:
+                continue
+            
+            # Treat None as far future for role end
+            role_end_check = role_end if role_end else datetime(9999, 12, 31)
+            
+            # Check for overlap: role starts before query ends AND role ends after query starts
+            if role_start < query_end_check and role_end_check > query_start:
+                # Calculate overlap duration
+                overlap_start = max(role_start, query_start)
+                overlap_end = min(role_end_check, query_end_check)
+                overlap_days = (overlap_end - overlap_start).days
+                overlap_years = overlap_days / 365.25
+                
+                holders.append({
+                    "entity": node_data.get("entity"),
+                    "start_date": role_start,
+                    "end_date": role_end,
+                    "overlap_start": overlap_start,
+                    "overlap_end": overlap_end,
+                    "overlap_years": round(overlap_years, 2),
+                    "overlap_days": overlap_days
+                })
+        
+        # Sort by overlap duration (longest first)
+        holders.sort(key=lambda x: x["overlap_days"], reverse=True)
+        return holders
+    
+    def find_temporal_overlap(self, role1_org: str, role1_name: str, role1_entity: str,
+                             role2_org: str, role2_name: str, role2_entity: str) -> Optional[Dict]:
+        """
+        Find the temporal overlap between two specific roles.
+        
+        Args:
+            role1_org: Organization for first role
+            role1_name: Position title for first role
+            role1_entity: Person holding first role
+            role2_org: Organization for second role
+            role2_name: Position title for second role
+            role2_entity: Person holding second role
+            
+        Returns:
+            Dict with overlap info or None if no overlap
+            
+        Example:
+            overlap = graph.find_temporal_overlap(
+                "Apple", "CEO", "Steve Jobs",
+                "United States", "President", "Barack Obama"
+            )
+            # Returns: {
+            #   "overlap_start": datetime(2009, 1, 20),
+            #   "overlap_end": datetime(2011, 8, 24),
+            #   "overlap_years": 2.6,
+            #   "role1_interval": (datetime(1997, 7, 9), datetime(2011, 8, 24)),
+            #   "role2_interval": (datetime(2009, 1, 20), datetime(2017, 1, 20))
+            # }
+        """
+        interval1 = self.get_role_interval(role1_org, role1_name, role1_entity)
+        interval2 = self.get_role_interval(role2_org, role2_name, role2_entity)
+        
+        if not interval1 or not interval2:
+            return None
+        
+        start1, end1 = interval1
+        start2, end2 = interval2
+        
+        if start1 is None or start2 is None:
+            return None
+        
+        # Treat None as far future
+        end1_check = end1 if end1 else datetime(9999, 12, 31)
+        end2_check = end2 if end2 else datetime(9999, 12, 31)
+        
+        # Check for overlap
+        if start1 >= end2_check or start2 >= end1_check:
+            return None  # No overlap
+        
+        # Calculate overlap
+        overlap_start = max(start1, start2)
+        overlap_end = min(end1_check, end2_check)
+        overlap_days = (overlap_end - overlap_start).days
+        overlap_years = overlap_days / 365.25
+        
+        return {
+            "overlap_start": overlap_start,
+            "overlap_end": overlap_end if overlap_end != datetime(9999, 12, 31) else None,
+            "overlap_years": round(overlap_years, 2),
+            "overlap_days": overlap_days,
+            "role1_interval": interval1,
+            "role2_interval": interval2
+        }
+    
+    def get_successors(self, org: str, role: str, entity: str) -> List[str]:
+        """
+        Get all successors of an entity in a specific role.
+        
+        Args:
+            org: Organization name
+            role: Position title
+            entity: Person name
+            
+        Returns:
+            List of entity names who succeeded this person (chronological order)
+            
+        Example:
+            successors = graph.get_successors("Apple", "CEO", "Steve Jobs")
+            # Returns: ["Tim Cook"]
+        """
+        chain = self.get_succession_chain(org, role)
+        
+        try:
+            idx = chain.index(entity)
+            return chain[idx + 1:]  # All successors after this person
+        except (ValueError, IndexError):
+            return []
+    
+    def get_predecessors(self, org: str, role: str, entity: str) -> List[str]:
+        """
+        Get all predecessors of an entity in a specific role.
+        
+        Args:
+            org: Organization name
+            role: Position title
+            entity: Person name
+            
+        Returns:
+            List of entity names who preceded this person (chronological order)
+            
+        Example:
+            predecessors = graph.get_predecessors("Apple", "CEO", "Tim Cook")
+            # Returns: ["Steve Jobs"]
+        """
+        chain = self.get_succession_chain(org, role)
+        
+        try:
+            idx = chain.index(entity)
+            return chain[:idx]  # All predecessors before this person
+        except ValueError:
+            return []
+    
+    # ===== END TEMPORAL JOIN METHODS =====
+    
     def save_to_file(self, filepath: str):
         """Save graph to JSON file."""
         with open(filepath, 'w') as f:
