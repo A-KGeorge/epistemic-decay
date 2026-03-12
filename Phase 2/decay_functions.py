@@ -187,6 +187,7 @@ def score_with_temporal_alignment(query_vec, doc_vec, query_intent,
     Combines:
     1. Standard cosine similarity (semantic + confidence)
     2. Temporal alignment multiplier based on query intent
+    3. Boundary condition matching (paradigm qualifier preservation)
     
     Args:
         query_vec: 385-dim query vector
@@ -194,11 +195,13 @@ def score_with_temporal_alignment(query_vec, doc_vec, query_intent,
         query_intent: Output from classify_temporal_intent()
         doc_acquired: Document acquisition date
         doc_verified: Document verification date (optional)
-        doc_text: Document text for content year extraction
+        doc_text: Document text for content year extraction and boundary condition matching
     
     Returns:
         (base_score, aligned_score, alignment_multiplier)
     """
+    from query_intent import compute_boundary_condition_match
+    
     # Base cosine similarity (same as Phase 1)
     base_score = np.dot(query_vec, doc_vec) / (np.linalg.norm(query_vec) * np.linalg.norm(doc_vec))
     
@@ -207,10 +210,17 @@ def score_with_temporal_alignment(query_vec, doc_vec, query_intent,
         query_intent, doc_acquired, doc_verified, doc_text
     )
     
-    # Apply alignment to the score
-    aligned_score = base_score * alignment_multiplier
+    # NEW: Compute boundary condition alignment (paradigm qualifier preservation)
+    boundary_conditions = query_intent.get("boundary_conditions", {})
+    boundary_multiplier = compute_boundary_condition_match(boundary_conditions, doc_text)
     
-    return base_score, aligned_score, alignment_multiplier
+    # Combine temporal alignment and boundary condition preservation
+    combined_multiplier = alignment_multiplier * boundary_multiplier
+    
+    # Apply alignment to the score
+    aligned_score = base_score * combined_multiplier
+    
+    return base_score, aligned_score, combined_multiplier
 
 
 # =====================================================================

@@ -112,6 +112,103 @@ def detect_query_tense(doc) -> str:
     return "present"  # default
 
 
+def detect_historical_perspective(text: str) -> Tuple[bool, Optional[Tuple[int, int]]]:
+    """
+    Detect if query requests historical perspective/worldview from a specific era.
+    
+    Examples:
+    - "Give me a 1990s perspective on..."
+    - "What was the 1980s view of..."
+    - "How did people in 2000s think about..."
+    - "1990s era predictions about..."
+    
+    Returns:
+        (is_historical_perspective, era_range)
+        - is_historical_perspective: True if query wants era-situated beliefs
+        - era_range: (start_year, end_year) of the requested era, or None
+    """
+    text_lower = text.lower()
+    
+    # Pattern 1: "[decade/year] perspective on/of/about"
+    perspective_patterns = [
+        r'(\d{4}s?)\s+(?:perspective|view|opinion|thoughts?|thinking|beliefs?)\s+(?:on|of|about|regarding)',
+        r'(?:perspective|view|opinion|beliefs?)\s+(?:from|in)\s+(?:the\s+)?(\d{4}s?)',
+        r'(\d{4}s?)\s+(?:era|time)\s+(?:perspective|view|predictions?|forecasts?)',
+        r'how\s+(?:did|were)\s+(?:people|experts|analysts)\s+(?:in|during)\s+(?:the\s+)?(\d{4}s?)\s+(?:think|view|see|predict)',
+        r'what\s+(?:was|were)\s+(?:the\s+)?(\d{4}s?)\s+(?:perspective|view|understanding|belief)',
+    ]
+    
+    for pattern in perspective_patterns:
+        match = re.search(pattern, text_lower)
+        if match:
+            year_str = match.group(1)
+            
+            # Parse era range
+            if year_str.endswith('s'):  # Decade like "1990s"
+                decade_start = int(year_str[:-1])
+                decade_start = (decade_start // 10) * 10
+                return True, (decade_start, decade_start + 9)
+            else:  # Specific year like "1995"
+                year = int(year_str)
+                # Use ±2 year window for specific years
+                return True, (year - 2, year + 2)
+    
+    return False, None
+
+
+def detect_boundary_conditions(text: str) -> Dict[str, str]:
+    """
+    Detect boundary conditions/paradigm qualifiers in query.
+    
+    These are prepositional phrases that specify conditions under which
+    a statement is true. They're scientifically critical, not flavor text.
+    
+    Examples:
+    - "In a vacuum, light travels at..."
+    - "At sea level, water boils at..."
+    - "In Euclidean geometry, parallel lines..."
+    - "According to Newton, F=ma"
+    - "Under normal conditions, ice melts at..."
+    
+    Returns:
+        Dict mapping condition type to extracted phrase
+        {"environment": "vacuum", "paradigm": "Euclidean geometry", ...}
+    """
+    text_lower = text.lower()
+    conditions = {}
+    
+    # Pattern: "in [a/the] X" (environmental/paradigm qualifier)
+    in_match = re.search(r'\bin\s+(?:a|the)?\s*([\w\s]+?)(?:,|\s+[a-z]+\s+(?:travels|boils|is|are|meet))', text_lower)
+    if in_match:
+        condition_phrase = in_match.group(1).strip()
+        # Categorize common conditions
+        if 'vacuum' in condition_phrase:
+            conditions['environment'] = 'vacuum'
+        elif 'geometry' in condition_phrase:
+            conditions['paradigm'] = condition_phrase
+        elif 'space' in condition_phrase:
+            conditions['environment'] = 'space'
+        else:
+            conditions['context'] = condition_phrase
+    
+    # Pattern: "at [sea level/normal pressure/etc]"
+    at_match = re.search(r'\bat\s+([\w\s]+?)(?:,|\s+[a-z]+\s+(?:water|ice|liquid))', text_lower)
+    if at_match:
+        conditions['environment'] = at_match.group(1).strip()
+    
+    # Pattern: "according to X" (paradigm scoping)
+    according_match = re.search(r'according\s+to\s+([\w\s]+?)(?:,|\s+[a-z]+)', text_lower)
+    if according_match:
+        conditions['paradigm'] = according_match.group(1).strip()
+    
+    # Pattern: "under X conditions"
+    under_match = re.search(r'under\s+([\w\s]+?)\s+conditions', text_lower)
+    if under_match:
+        conditions['environment'] = under_match.group(1).strip() + ' conditions'
+    
+    return conditions
+
+
 def detect_temporal_markers(text: str) -> Dict[str, bool]:
     """
     Detect temporal marker keywords in query.
@@ -156,9 +253,12 @@ def classify_temporal_intent(query: str) -> Dict:
             "years": [1997, ...],  # explicit year constraints
             "decade_range": (1990, 1999) | None,
             "markers": {"current": True, ...},
-            "preference": "historical" | "current" | "future" | "specific_date" | "agnostic",
+            "preference": "historical" | "current" | "future" | "specific_date" | "agnostic" | "historical_perspective",
             "directional": "before" | "after" | "during" | None,
-            "role_seal": bool  # True if query contains inherently historical roles
+            "role_seal": bool,  # True if query contains inherently historical roles
+            "historical_perspective": bool,  # True if query wants era-situated beliefs
+            "perspective_era": (start, end) | None,  # Era range for historical perspective
+            "boundary_conditions": dict  # Paradigm qualifiers like "in a vacuum"
         }
     """
     doc = nlp(query)
@@ -166,6 +266,12 @@ def classify_temporal_intent(query: str) -> Dict:
     tense = detect_query_tense(doc)
     years = extract_year_constraints(query)
     markers = detect_temporal_markers(query)
+    
+    # NEW: Detect historical perspective queries
+    is_historical_perspective, perspective_era = detect_historical_perspective(query)
+    
+    # NEW: Detect boundary conditions (paradigm qualifiers)
+    boundary_conditions = detect_boundary_conditions(query)
     
     # Detect directional operators
     directional = None
@@ -191,8 +297,14 @@ def classify_temporal_intent(query: str) -> Dict:
     # Determine temporal preference
     preference = "agnostic"  # default
     
+    # HIGHEST PRIORITY: Historical perspective queries (era-situated beliefs)
+    if is_historical_perspective:
+        preference = "historical_perspective"
+        # Override years with perspective era if not already set
+        if not years and perspective_era:
+            years = [perspective_era[0], perspective_era[1]]
     # Directional operators take precedence when present
-    if directional in ["before", "after"]:
+    elif directional in ["before", "after"]:
         # Keep years for alignment filtering, but note this is a directional query
         if years:
             preference = "specific_date"  # Will use year + directional filtering
@@ -234,7 +346,10 @@ def classify_temporal_intent(query: str) -> Dict:
         "preference": preference,
         "directional": directional,
         "role_seal": role_seal,
-        "explicit_directional": explicit_directional  # NEW: Enables strong gradients safely
+        "explicit_directional": explicit_directional,
+        "historical_perspective": is_historical_perspective,
+        "perspective_era": perspective_era,
+        "boundary_conditions": boundary_conditions
     }
 
 
@@ -289,6 +404,27 @@ def compute_temporal_alignment(query_intent: Dict, doc_acquired: datetime,
     # Check if this is an EXPLICIT directional query (safe for strong gradients)
     explicit_directional = query_intent.get("explicit_directional", False)
     
+    # HIGHEST PRIORITY: Historical perspective queries (era-situated beliefs)
+    # User wants historical worldview, not current accuracy - REVERSE temporal logic
+    if preference == "historical_perspective":
+        perspective_era = query_intent.get("perspective_era")
+        if perspective_era:
+            era_start, era_end = perspective_era
+            era_midpoint = (era_start + era_end) / 2
+            
+            # Documents FROM the requested era get massive boost
+            if era_start <= doc_year <= era_end:
+                return 1.50  # Strong boost for era-appropriate documents
+            # Documents BEFORE the era are acceptable (older perspectives)
+            elif doc_year < era_start:
+                years_before = era_start - doc_year
+                return max(0.90, 1.20 - (years_before * 0.05))  # Gentle decay
+            # Documents AFTER the era are anachronistic - heavy penalty
+            else:  # doc_year > era_end
+                years_after = doc_year - era_end
+                # Steep penalty: 5 years after = 0.60, 10 years = 0.40, 20 years = 0.30
+                return max(0.30, 0.90 - (years_after * 0.06))
+    
     # Entity-based directional queries - Apply STRONG gradients ONLY for explicit directional
     # For general "historical" preference (from tense), stay neutral to protect TempQuestions
     if explicit_directional and directional == "before" and "before_entity" in markers and not query_years:
@@ -340,6 +476,57 @@ def compute_temporal_alignment(query_intent: Dict, doc_acquired: datetime,
     # Stale docs can be recent, correct docs can be old
     # Only explicit temporal constraints (years, directional operators) warrant alignment boosts
     return 1.0
+
+
+def compute_boundary_condition_match(query_conditions: Dict[str, str], doc_text: str) -> float:
+    """
+    Compute alignment score for boundary condition preservation.
+    
+    Rewards documents that preserve query's boundary conditions (paradigm qualifiers).
+    
+    Examples:
+    - Query: "In a vacuum, light travels at X"
+    - Doc with "in a vacuum": 1.20 (preserved condition)
+    - Doc without: 0.90 (lost precision)
+    
+    Args:
+        query_conditions: Dict from detect_boundary_conditions()
+        doc_text: Document text to check for condition preservation
+    
+    Returns:
+        Multiplier (0.85 to 1.25)
+        - 1.25: Exact condition match (scientifically precise)
+        - 1.00: No conditions to match (neutral)
+        - 0.90: Condition present in query but absent in doc (lossy generalization)
+    """
+    if not query_conditions:
+        return 1.0  # No conditions to match
+    
+    doc_lower = doc_text.lower()
+    matches = 0
+    total_conditions = len(query_conditions)
+    
+    for condition_type, condition_value in query_conditions.items():
+        condition_lower = condition_value.lower()
+        
+        # Check for exact phrase match
+        if condition_lower in doc_lower:
+            matches += 1
+        # Check for key term match (e.g., "vacuum" in "in a vacuum")
+        elif any(term in doc_lower for term in condition_lower.split() if len(term) > 3):
+            matches += 0.5  # Partial credit for related terms
+    
+    if matches == 0:
+        # Query has boundary conditions but doc doesn't preserve them
+        # This is lossy generalization - scientific precision lost
+        return 0.85
+    elif matches == total_conditions:
+        # Perfect preservation of all boundary conditions
+        return 1.25
+    else:
+        # Partial preservation
+        match_ratio = matches / total_conditions
+        return 1.0 + (match_ratio * 0.25)
 
 
 # Test examples

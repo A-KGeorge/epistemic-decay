@@ -1,11 +1,25 @@
-﻿python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/verified_specific_date_benchmark.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8
+﻿================================================================================
+FULL PIPELINE BENCHMARK RESULTS
+================================================================================
+Generated: March 12, 2026
+Pipeline: Phase 1 → Phase 2 → Phase 4 → Phase 3
+
+Recent Enhancements:
+- Historical perspective reversal (1990s perspective queries)
+- Boundary condition preservation (conditional physical laws)
+- Knowledge graph structural matching (role succession)
+- Adaptive confidence thresholds (EXACT matches override)
+
+================================================================================
+
+python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/fuzzy_logic_benchmark.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append
 
 Loaded Phase 3 knowledge graph: 62 nodes
 
 ================================================================================
 FULL PIPELINE: P1 -> P2 -> P4 -> P3
 ================================================================================
-Test cases: 153
+Test cases: 10
 Mode: Quiet (large-scale)
 Query source: query (present tense)
 
@@ -18,30 +32,148 @@ Architecture:
     - Medium confidence (0.5-0.8): Use if beats both document scores
     - Low confidence (<0.5): Ignore, use Phase 4
 
-Processing... 50/153 (32.7%)
-Processing... 100/153 (65.4%)
-Processing... 150/153 (98.0%)
 
 ================================================================================
 RESULTS SUMMARY
 ================================================================================
 
 Accuracy by Phase:
-  Phase 2 (temporal only):           153/153 (100.0%)
-  Phase 4 (integrated P2╫modifiers): 153/153 (100.0%)
-  Phase 3 (graph override):          153/153 (100.0%)
+  Phase 2 (temporal only):           8/10 (80.0%)
+  Phase 4 (integrated P2╫modifiers): 8/10 (80.0%)
+  Phase 3 (graph override):          8/10 (80.0%)
 
 Phase 4 vs Phase 2: +0 cases (+0.0 pts)
 Phase 3 vs Phase 4: +0 cases (+0.0 pts)
 
 Phase-over-Phase Breakdown:
-  P4 rescued from P2: 0/153 (0.0%)
-  P4 regressed from P2: 0/153 (0.0%)
-  P3 rescued from P4: 0/153 (0.0%)
-  P3 regressed from P4: 0/153 (0.0%)
+  P4 rescued from P2: 0/10 (0.0%)
+  P4 regressed from P2: 0/10 (0.0%)
+  P3 rescued from P4: 0/10 (0.0%)
+  P3 regressed from P4: 0/10 (0.0%)
 
 Strategy Distribution:
-  temporal_alignment_preserved: 153 (100.0%)
+  temporal_alignment_preserved:  10 (100.0%)
+
+================================================================================
+FINAL FAILURES (2 cases)
+================================================================================
+
+ID: unnamed_1
+Query: The current CEO knows the Pythagorean theorem is always true.
+Expected: pure_mathematical, Got: contaminated_zero_decay
+  Phase 2: contaminated_zero_decay (FAIL)
+  Phase 4: contaminated_zero_decay (FAIL)
+  Phase 3: contaminated_zero_decay
+  Doc1: P2=0.9966 x 1.000 = 0.9966
+  Doc2: P2=0.7713 x 1.000 = 0.7713
+  Strategy: temporal_alignment_preserved
+
+ID: unnamed_3
+Query: Who leads the company since Tim Cook's departure?
+Expected: post_transition_ceo, Got: tim_cook_era
+  Phase 2: tim_cook_era (FAIL)
+  Phase 4: tim_cook_era (FAIL)
+  Phase 3: tim_cook_era
+  Doc1: P2=1.1450 x 1.000 = 1.1450
+  Doc2: P2=1.1685 x 1.000 = 1.1685
+  Strategy: temporal_alignment_preserved
+
+python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/edge_cases_benchmark.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append
+
+Loaded Phase 3 knowledge graph: 62 nodes
+
+================================================================================
+FULL PIPELINE: P1 -> P2 -> P4 -> P3
+================================================================================
+Test cases: 15
+Mode: Quiet (large-scale)
+Query source: query (present tense)
+
+Architecture:
+  Phase 1: Temporal decay (document-side)
+  Phase 2: Temporal alignment (query-side)
+  Phase 4: Epistemic modulation (paradigm x uncertainty x dependency x zero-decay)
+  Phase 3: Graph override (role queries with adaptive confidence)
+    - High confidence (>=0.8): Always use graph
+    - Medium confidence (0.5-0.8): Use if beats both document scores
+    - Low confidence (<0.5): Ignore, use Phase 4
+
+
+================================================================================
+RESULTS SUMMARY
+================================================================================
+
+Accuracy by Phase:
+  Phase 2 (temporal only):           9/15 (60.0%)
+  Phase 4 (integrated P2╫modifiers): 9/15 (60.0%)
+  Phase 3 (graph override):          10/15 (66.7%)
+
+Phase 4 vs Phase 2: +0 cases (+0.0 pts)
+Phase 3 vs Phase 4: +1 cases (+6.7 pts)
+
+Phase-over-Phase Breakdown:
+  P4 rescued from P2: 1/15 (6.7%)
+  P4 regressed from P2: 1/15 (6.7%)
+  P3 rescued from P4: 1/15 (6.7%)
+  P3 regressed from P4: 0/15 (0.0%)
+
+Strategy Distribution:
+  temporal_alignment_preserved:  12 (80.0%)
+  uncertainty_modulation   :   3 (20.0%)
+
+================================================================================
+FINAL FAILURES (5 cases)
+================================================================================
+
+ID: unnamed_2
+Query: The current CEO was the founder in 1998.
+Expected: clean_historical, Got: contradictory_tense
+  Phase 2: contradictory_tense (FAIL)
+  Phase 4: contradictory_tense (FAIL)
+  Phase 3: contradictory_tense
+  Doc1: P2=0.7403 x 1.000 = 0.7403
+  Doc2: P2=0.6727 x 1.000 = 0.6727
+  Strategy: temporal_alignment_preserved
+
+ID: unnamed_3
+Query: Who is the former President?
+Expected: current_president, Got: former_role_confusion
+  Phase 2: former_role_confusion (FAIL)
+  Phase 4: former_role_confusion (FAIL)
+  Phase 3: former_role_confusion
+  Doc1: P2=0.7230 x 1.000 = 0.7230
+  Doc2: P2=0.5681 x 1.000 = 0.5681
+  Strategy: temporal_alignment_preserved
+
+ID: unnamed_9
+Query: In a vacuum, light travels at approximately 299,792,458 m/s.
+Expected: conditional_physical_law, Got: unconditional_law
+  Phase 2: conditional_physical_law (OK)
+  Phase 4: unconditional_law (FAIL)
+  Phase 3: unconditional_law
+  Doc1: P2=0.8290 x 0.722 = 0.5989
+  Doc2: P2=0.7352 x 1.000 = 0.7352
+  Strategy: uncertainty_modulation
+
+ID: unnamed_10
+Query: Do parallel lines meet in geometry?
+Expected: euclidean_geometry, Got: non_euclidean_geometry
+  Phase 2: non_euclidean_geometry (FAIL)
+  Phase 4: non_euclidean_geometry (FAIL)
+  Phase 3: non_euclidean_geometry
+  Doc1: P2=0.6247 x 1.000 = 0.6247
+  Doc2: P2=0.6448 x 1.000 = 0.6448
+  Strategy: temporal_alignment_preserved
+
+ID: unnamed_13
+Query: The CEO announced quarterly earnings that exceeded expectations.
+Expected: specific_fact, Got: vague_temporal
+  Phase 2: vague_temporal (FAIL)
+  Phase 4: vague_temporal (FAIL)
+  Phase 3: vague_temporal
+  Doc1: P2=1.0000 x 1.000 = 1.0000
+  Doc2: P2=0.7472 x 1.000 = 0.7472
+  Strategy: temporal_alignment_preserved
 
 python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/specific_date_benchmark_large.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append
 
@@ -149,13 +281,15 @@ Expected: from_2020, Got: from_2023
   Doc1: P2=0.4782 x 1.000 = 0.4782
   Doc2: P2=0.4830 x 1.000 = 0.4830
   Strategy: temporal_alignment_preserved
-  
-python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/fuzzy_logic_benchmark.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append  Loaded Phase 3 knowledge graph: 62 nodes
+
+python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/verified_specific_date_benchmark.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append
+
+Loaded Phase 3 knowledge graph: 62 nodes
 
 ================================================================================
 FULL PIPELINE: P1 -> P2 -> P4 -> P3
 ================================================================================
-Test cases: 10
+Test cases: 153
 Mode: Quiet (large-scale)
 Query source: query (present tense)
 
@@ -168,51 +302,30 @@ Architecture:
     - Medium confidence (0.5-0.8): Use if beats both document scores
     - Low confidence (<0.5): Ignore, use Phase 4
 
+Processing... 50/153 (32.7%)
+Processing... 100/153 (65.4%)
+Processing... 150/153 (98.0%)
 
 ================================================================================
 RESULTS SUMMARY
 ================================================================================
 
 Accuracy by Phase:
-  Phase 2 (temporal only):           8/10 (80.0%)
-  Phase 4 (integrated P2╫modifiers): 8/10 (80.0%)
-  Phase 3 (graph override):          8/10 (80.0%)
+  Phase 2 (temporal only):           153/153 (100.0%)
+  Phase 4 (integrated P2╫modifiers): 153/153 (100.0%)
+  Phase 3 (graph override):          153/153 (100.0%)
 
 Phase 4 vs Phase 2: +0 cases (+0.0 pts)
 Phase 3 vs Phase 4: +0 cases (+0.0 pts)
 
 Phase-over-Phase Breakdown:
-  P4 rescued from P2: 0/10 (0.0%)
-  P4 regressed from P2: 0/10 (0.0%)
-  P3 rescued from P4: 0/10 (0.0%)
-  P3 regressed from P4: 0/10 (0.0%)
+  P4 rescued from P2: 0/153 (0.0%)
+  P4 regressed from P2: 0/153 (0.0%)
+  P3 rescued from P4: 0/153 (0.0%)
+  P3 regressed from P4: 0/153 (0.0%)
 
 Strategy Distribution:
-  temporal_alignment_preserved:  10 (100.0%)
-
-================================================================================
-FINAL FAILURES (2 cases)
-================================================================================
-
-ID: unnamed_1
-Query: The current CEO knows the Pythagorean theorem is always true.
-Expected: pure_mathematical, Got: contaminated_zero_decay
-  Phase 2: contaminated_zero_decay (FAIL)
-  Phase 4: contaminated_zero_decay (FAIL)
-  Phase 3: contaminated_zero_decay
-  Doc1: P2=0.9966 x 1.000 = 0.9966
-  Doc2: P2=0.7713 x 1.000 = 0.7713
-  Strategy: temporal_alignment_preserved
-
-ID: unnamed_3
-Query: Who leads the company since Tim Cook's departure?
-Expected: post_transition_ceo, Got: tim_cook_era
-  Phase 2: tim_cook_era (FAIL)
-  Phase 4: tim_cook_era (FAIL)
-  Phase 3: tim_cook_era
-  Doc1: P2=1.1450 x 1.000 = 1.1450
-  Doc2: P2=1.1685 x 1.000 = 1.1685
-  Strategy: temporal_alignment_preserved
+  temporal_alignment_preserved: 153 (100.0%)
 
 python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/tempquestions_retrieval_large.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append
 
@@ -291,110 +404,3 @@ Strategy Distribution:
   temporal_alignment_preserved: 1740 (100.0%)
 
 (138 failures - too many to display individually)
-
-python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/edge_cases_benchmark.json.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append   
-
-Loaded Phase 3 knowledge graph: 62 nodes
-
-================================================================================
-FULL PIPELINE: P1 -> P2 -> P4 -> P3
-================================================================================
-Test cases: 15
-Mode: Quiet (large-scale)
-Query source: query (present tense)
-
-Architecture:
-  Phase 1: Temporal decay (document-side)
-  Phase 2: Temporal alignment (query-side)
-  Phase 4: Epistemic modulation (paradigm x uncertainty x dependency x zero-decay)
-  Phase 3: Graph override (role queries with adaptive confidence)
-    - High confidence (>=0.8): Always use graph
-    - Medium confidence (0.5-0.8): Use if beats both document scores
-    - Low confidence (<0.5): Ignore, use Phase 4
-
-
-================================================================================
-RESULTS SUMMARY
-================================================================================
-
-Accuracy by Phase:
-  Phase 2 (temporal only):           7/15 (46.7%)
-  Phase 4 (integrated P2╫modifiers): 8/15 (53.3%)
-  Phase 3 (graph override):          9/15 (60.0%)
-
-Phase 4 vs Phase 2: +1 cases (+6.7 pts)
-Phase 3 vs Phase 4: +1 cases (+6.7 pts)
-
-Phase-over-Phase Breakdown:
-  P4 rescued from P2: 1/15 (6.7%)
-  P4 regressed from P2: 0/15 (0.0%)
-  P3 rescued from P4: 1/15 (6.7%)
-  P3 regressed from P4: 0/15 (0.0%)
-
-Strategy Distribution:
-  temporal_alignment_preserved:  12 (80.0%)
-  uncertainty_modulation   :   3 (20.0%)
-
-================================================================================
-FINAL FAILURES (6 cases)
-================================================================================
-
-ID: unnamed_2
-Query: The current CEO was the founder in 1998.
-Expected: clean_historical, Got: contradictory_tense
-  Phase 2: contradictory_tense (FAIL)
-  Phase 4: contradictory_tense (FAIL)
-  Phase 3: contradictory_tense
-  Doc1: P2=0.7403 x 1.000 = 0.7403
-  Doc2: P2=0.6727 x 1.000 = 0.6727
-  Strategy: temporal_alignment_preserved
-
-ID: unnamed_3
-Query: Who is the former President?
-Expected: current_president, Got: former_role_confusion
-  Phase 2: former_role_confusion (FAIL)
-  Phase 4: former_role_confusion (FAIL)
-  Phase 3: former_role_confusion
-  Doc1: P2=0.7230 x 1.000 = 0.7230
-  Doc2: P2=0.5681 x 1.000 = 0.5681
-  Strategy: temporal_alignment_preserved
-
-ID: unnamed_8
-Query: Give me a 1990s perspective on the future of the internet.
-Expected: 1995_perspective, Got: 2024_retrospective
-  Phase 2: 2024_retrospective (FAIL)
-  Phase 4: 2024_retrospective (FAIL)
-  Phase 3: 2024_retrospective
-  Doc1: P2=0.4543 x 0.700 = 0.3180
-  Doc2: P2=0.6220 x 0.600 = 0.3732
-  Strategy: temporal_alignment_preserved
-
-ID: unnamed_9
-Query: In a vacuum, light travels at approximately 299,792,458 m/s.
-Expected: conditional_physical_law, Got: unconditional_law
-  Phase 2: unconditional_law (FAIL)
-  Phase 4: unconditional_law (FAIL)
-  Phase 3: unconditional_law
-  Doc1: P2=0.6632 x 0.722 = 0.4791
-  Doc2: P2=0.8649 x 1.000 = 0.8649
-  Strategy: uncertainty_modulation
-
-ID: unnamed_10
-Query: Do parallel lines meet in geometry?
-Expected: euclidean_geometry, Got: non_euclidean_geometry
-  Phase 2: non_euclidean_geometry (FAIL)
-  Phase 4: non_euclidean_geometry (FAIL)
-  Phase 3: non_euclidean_geometry
-  Doc1: P2=0.6247 x 1.000 = 0.6247
-  Doc2: P2=0.6448 x 1.000 = 0.6448
-  Strategy: temporal_alignment_preserved
-
-ID: unnamed_13
-Query: The CEO announced quarterly earnings that exceeded expectations.
-Expected: specific_fact, Got: vague_temporal
-  Phase 2: vague_temporal (FAIL)
-  Phase 4: vague_temporal (FAIL)
-  Phase 3: vague_temporal
-  Doc1: P2=1.0000 x 1.000 = 1.0000
-  Doc2: P2=0.7472 x 1.000 = 0.7472
-  Strategy: temporal_alignment_preserved
