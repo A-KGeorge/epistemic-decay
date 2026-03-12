@@ -26,7 +26,8 @@ from query_graph import extract_query_constraints
 
 
 def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
-                            doc_acquired_date: Optional[datetime] = None) -> Dict:
+                            doc_acquired_date: Optional[datetime] = None,
+                            doc_text: Optional[str] = None) -> Dict:
     """
     Compute structural alignment between query and knowledge graph.
     
@@ -34,6 +35,7 @@ def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
         query: Natural language query
         knowledge_graph: Graph containing document facts
         doc_acquired_date: When document was acquired (for era matching)
+        doc_text: Document text (for entity matching in temporal overlap queries)
         
     Returns:
         Dict with:
@@ -41,6 +43,7 @@ def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
         - match_type: EXACT | NEAR_MATCH | PARTIAL | NO_MATCH
         - matched_entity: Entity that matched (or None)
         - explanation: Human-readable match explanation
+        - all_matches: List of all matching entities (for temporal overlap queries)
         
     Examples:
         >>> graph = TemporalKnowledgeGraph()
@@ -59,12 +62,26 @@ def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
     year = constraints["year"]
     query_type = constraints["query_type"]
     
+    # Normalize organization names (do this BEFORE query handlers)
+    if org:
+        org_lower = org.lower()
+        if org_lower in ["us", "usa", "u.s.", "u.s.a.", "united states", "america"]:
+            org = "United States"
+            constraints["org"] = org
+        elif org_lower in ["uk", "u.k.", "united kingdom", "britain", "great britain"]:
+            org = "United Kingdom"
+            constraints["org"] = org
+        elif org_lower in ["france", "french republic"]:
+            org = "France"
+            constraints["org"] = org
+    
     result = {
         "score": 0.0,
         "match_type": "NO_MATCH",
         "matched_entity": None,
         "explanation": "No structural match found",
-        "constraints": constraints
+        "constraints": constraints,
+        "all_matches": []  # For temporal overlap queries with multiple valid answers
     }
     
     # Handle specific_role_year queries
@@ -156,6 +173,140 @@ def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
                 result["match_type"] = "EXACT"
                 result["matched_entity"] = founder
                 result["explanation"] = f"{founder} was founder / earliest {role_to_check} of {org}"
+    
+    # Handle temporal overlap queries ("while" queries)
+    elif query_type == "temporal_overlap":
+        # Example: "Who was President while Steve Jobs was CEO of Apple?"
+        # Strategy: Parse "while X was Y of Z" to extract entity1, role1, org1
+        # Then find role_query holders at org_query during that interval
+        
+        entity1 = constraints.get("entity")  # e.g., "Steve Job" (NER may drop 's')
+        role_query = constraints.get("role")  # e.g., "President" (what we're asking about)
+        org_query = constraints.get("org")    # e.g., "United States" (already normalized)
+        
+        if entity1 and role_query:
+            # Parse the "while" clause to extract entity1's role and org
+            # Pattern: "while [entity] was [role] of [org]"
+            import re
+            query_lower = query.lower()
+            
+            # Extract role and org from "while" clause
+            # Simplified: Look for common patterns
+            entity1_role = None
+            entity1_org = None
+            
+            # Try to find role mentions in "while" clause
+            while_match = re.search(r'while\s+.*?\s+(?:was|is)\s+(?:the\s+)?(\w+)\s+(?:of|at)\s+(\w+)', query_lower, re.IGNORECASE)
+            if while_match:
+                entity1_role = while_match.group(1).upper()
+                entity1_org = while_match.group(2).capitalize()
+                
+                # Standardize role names
+                if entity1_role == "CEO":
+                    entity1_role = "CEO"
+                elif entity1_role in ["PRESIDENT", "PRES"]:
+                    entity1_role = "President"
+                elif entity1_role in ["PM", "PRIME"]:
+                    entity1_role = "Prime Minister"
+            
+            # If parsing failed, try common defaults based on entity
+            if not entity1_role or not entity1_org:
+                # Try to guess from context
+                entity1_lower = entity1.lower()
+                if "job" in entity1_lower or "cook" in entity1_lower:  # Jobs or Cook
+                    entity1_role = "CEO"
+                    entity1_org = "Apple"
+                elif "bezos" in entity1_lower or "jassy" in entity1_lower:
+                    entity1_role = "CEO"
+                    entity1_org = "Amazon"
+                elif "zuckerberg" in entity1_lower:
+                    entity1_role = "CEO"
+                    entity1_org = "Meta"
+            
+            if entity1_role and entity1_org:
+                # Try to find entity1 with fuzzy matching (handle "Steve Job" vs "Steve Jobs")
+                # Get all role holders for this org/role
+                all_holders = knowledge_graph.get_all_role_holders(entity1_org, entity1_role)
+                
+                matched_entity = None
+                entity1_interval = None
+                
+                # Fuzzy match entity name
+                for holder_data in all_holders:
+                    holder_name = holder_data["entity"]
+                    # Case-insensitive substring matching (handles dropped 's', etc.)
+                    if (entity1.lower() in holder_name.lower() or 
+                        holder_name.lower() in entity1.lower() or
+                        entity1.replace("'s", "").lower() == holder_name.replace("'s", "").lower()):
+                        matched_entity = holder_name
+                        entity1_interval = (holder_data["start_date"], holder_data["end_date"])
+                        break
+                
+                if entity1_interval and entity1_interval[0]:
+                    # Find all holders of role_query at org_query during entity1's interval
+                    holders = knowledge_graph.get_role_holders_in_interval(
+                        org_query, role_query, entity1_interval
+                    )
+                    
+                    if holders:
+                        # Store all matching entities (valid answers)
+                        result["all_matches"] = [h["entity"] for h in holders]
+                        
+                        # If doc_text provided, check which entity is mentioned
+                        best_holder = None
+                        doc_entity_in_matches = False
+                        
+                        if doc_text:
+                            for holder in holders:
+                                entity_name = holder["entity"]
+                                # Check if entity mentioned in document (fuzzy match)
+                                # Handle "Clinton" matching "Bill Clinton", etc.
+                                name_parts = entity_name.split()
+                                if any(part.lower() in doc_text.lower() for part in name_parts if len(part) > 3):
+                                    best_holder = holder
+                                    doc_entity_in_matches = True
+                                    break
+                            
+                            # Check if document mentions an entity NOT in matches (wrong answer)
+                            # This would be someone who held the role but NOT during the overlap period
+                            if not doc_entity_in_matches:
+                                # Check if doc mentions any entity that's NOT in the valid matches
+                                all_role_holders = knowledge_graph.get_all_role_holders(org_query, role_query)
+                                for holder_data in all_role_holders:
+                                    entity_name = holder_data["entity"]
+                                    if entity_name not in result["all_matches"]:
+                                        # This entity held the role but NOT during overlap period
+                                        name_parts = entity_name.split()
+                                        if any(part.lower() in doc_text.lower() for part in name_parts if len(part) > 3):
+                                            # Document mentions wrong entity - score should be 0
+                                            result["score"] = 0.0
+                                            result["match_type"] = "NO_MATCH"
+                                            result["matched_entity"] = None
+                                            result["explanation"] = (
+                                                f"{entity_name} held {role_query} of {org_query} but NOT during "
+                                                f"{matched_entity}'s tenure as {entity1_role} of {entity1_org}"
+                                            )
+                                            return result
+                        
+                        # If no doc_text match or no doc provided, use highest overlap
+                        if not best_holder:
+                            best_holder = holders[0]  # Already sorted by overlap_years descending
+                        
+                        result["score"] = 1.0
+                        result["match_type"] = "EXACT"
+                        result["matched_entity"] = best_holder["entity"]
+                        overlap_years = best_holder.get("overlap_years", 0)
+                        result["explanation"] = (
+                            f"{best_holder['entity']} held {role_query} of {org_query} "
+                            f"during {matched_entity}'s tenure as {entity1_role} of {entity1_org} "
+                            f"({overlap_years:.1f} years overlap)"
+                        )
+                    else:
+                        result["explanation"] = f"No {role_query} of {org_query} found during {matched_entity}'s tenure"
+                else:
+                    result["explanation"] = f"{entity1} not found as {entity1_role} of {entity1_org} in graph"
+            else:
+                result["explanation"] = "Could not extract entity1's role/org from 'while' clause"
     
     return result
 

@@ -37,7 +37,7 @@ ROLE_KEYWORDS = {
 
 # Directional operators
 DIRECTIONAL_KEYWORDS = {
-    "before", "after", "since", "during", "until"
+    "before", "after", "since", "during", "until", "while"
 }
 
 
@@ -54,8 +54,8 @@ def extract_query_constraints(query: str) -> Dict:
         - role: Role/position (or None)
         - year: Explicit year (or None)
         - entity: Explicit entity mentioned (or None)
-        - directional: before/after/since/during/until (or None)
-        - query_type: specific_role_year | succession | founder | general
+        - directional: before/after/since/during/until/while (or None)
+        - query_type: specific_role_year | succession | founder | temporal_overlap | general
         
     Examples:
         >>> extract_query_constraints("Who was CEO of Amazon in 2021?")
@@ -95,11 +95,37 @@ def extract_query_constraints(query: str) -> Dict:
     if year_match:
         constraints["year"] = int(year_match.group(1))
     
-    # Extract role keywords
-    for role in ROLE_KEYWORDS:
-        if role.lower() in query_lower:
-            constraints["role"] = role
+    # Check for directional operators first (affects role extraction)
+    for keyword in DIRECTIONAL_KEYWORDS:
+        if keyword in query_lower:
+            constraints["directional"] = keyword
             break
+    
+    # For "while" queries, extract role from MAIN question, not "while" clause
+    if constraints["directional"] == "while":
+        # Split query at "while" to separate main question from condition
+        parts = query_lower.split("while")
+        if len(parts) == 2:
+            main_question = parts[0]  # "Who was the US President"
+            while_clause = parts[1]   # "Steve Jobs was the CEO of Apple"
+            
+            # Extract role from main question only
+            for role in ROLE_KEYWORDS:
+                if role.lower() in main_question:
+                    constraints["role"] = role
+                    break
+        else:
+            # Fallback to normal extraction
+            for role in ROLE_KEYWORDS:
+                if role.lower() in query_lower:
+                    constraints["role"] = role
+                    break
+    else:
+        # Normal role extraction for non-while queries
+        for role in ROLE_KEYWORDS:
+            if role.lower() in query_lower:
+                constraints["role"] = role
+                break
     
     # Extract organizations and people using NER (use original doc with capitalization)
     entities = [(ent.text, ent.label_) for ent in doc.ents]
@@ -143,6 +169,8 @@ def extract_query_constraints(query: str) -> Dict:
     # Infer query type (do this after org inference)
     if constraints["year"] and constraints["role"] and constraints["org"]:
         constraints["query_type"] = "specific_role_year"
+    elif constraints["directional"] == "while" and constraints["entity"]:
+        constraints["query_type"] = "temporal_overlap"
     elif constraints["directional"] and constraints["entity"]:
         constraints["query_type"] = "succession"
     elif "founder" in query_lower or "founded" in query_lower:

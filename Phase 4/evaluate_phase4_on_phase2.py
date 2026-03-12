@@ -104,7 +104,7 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
     if use_graph:
         graph_facts_path = Path(__file__).parent.parent / "Phase 3" / "graph_facts.json"
         knowledge_graph = load_phase3_graph(str(graph_facts_path))
-        print(f"✓ Loaded Phase 3 knowledge graph: {knowledge_graph.graph.number_of_nodes()} nodes")
+        print(f"Loaded Phase 3 knowledge graph: {knowledge_graph.graph.number_of_nodes()} nodes")
         print()
     
     with open(benchmark_file, 'r') as f:
@@ -133,7 +133,7 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
     
     print("="*80)
     if use_graph:
-        print("FULL PIPELINE: P1 → P2 → P4 → P3")
+        print("FULL PIPELINE: P1 -> P2 -> P4 -> P3")
     else:
         print("PHASE 4 MULTI-DIMENSIONAL DECAY ON PHASE 2 BENCHMARKS")
     print("="*80)
@@ -144,9 +144,12 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
     print("Architecture:")
     print("  Phase 1: Temporal decay (document-side)")
     print("  Phase 2: Temporal alignment (query-side)")
-    print("  Phase 4: Epistemic modulation (λp × λu × λd × λ0)")
+    print("  Phase 4: Epistemic modulation (paradigm x uncertainty x dependency x zero-decay)")
     if use_graph:
-        print("  Phase 3: Graph override (role queries with confidence ≥ 0.8)")
+        print("  Phase 3: Graph override (role queries with adaptive confidence)")
+        print("    - High confidence (>=0.8): Always use graph")
+        print("    - Medium confidence (0.5-0.8): Use if beats both document scores")
+        print("    - Low confidence (<0.5): Ignore, use Phase 4")
     print()
     
     failures = []
@@ -272,29 +275,64 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         phase3_winner = phase4_winner  # Default to Phase 4 result
         phase3_override = False
         graph_confidence = 0.0
+        graph_override_reason = "Graph not enabled"
         
         if use_graph:
             from graph_matching import compute_graph_alignment
             
-            # Try graph matching
-            doc1_graph_result = compute_graph_alignment(query, knowledge_graph, doc1_acquired)
-            doc2_graph_result = compute_graph_alignment(query, knowledge_graph, doc2_acquired)
+            # Try graph matching with document text for entity-aware matching
+            doc1_graph_result = compute_graph_alignment(query, knowledge_graph, doc1_acquired, doc1["text"])
+            doc2_graph_result = compute_graph_alignment(query, knowledge_graph, doc2_acquired, doc2["text"])
             
-            # Check for high-confidence match (≥ 0.8 = EXACT or high NEAR_MATCH)
             doc1_graph_score = doc1_graph_result["score"]
             doc2_graph_score = doc2_graph_result["score"]
             
-            # Override if one document has significantly better graph match
-            if doc1_graph_score >= 0.8 or doc2_graph_score >= 0.8:
-                # Apply graph override
-                if doc1_graph_score > doc2_graph_score:
-                    phase3_winner = doc1_key
-                    phase3_override = True
-                    graph_confidence = doc1_graph_score
-                elif doc2_graph_score > doc1_graph_score:
-                    phase3_winner = doc2_key
-                    phase3_override = True
-                    graph_confidence = doc2_graph_score
+            # ADAPTIVE CONFIDENCE THRESHOLD:
+            # 1. EXACT match (score = 1.0): Always override (structural fact beats embeddings)
+            # 2. High confidence (≥ 0.8): Use graph for strong NEAR_MATCH
+            # 3. Medium confidence (0.5-0.8): Use graph if it beats BOTH document scores
+            # 4. Low confidence (< 0.5): Ignore graph, use Phase 4 scores
+            
+            exact_match_threshold = 1.0
+            high_confidence_threshold = 0.8
+            medium_confidence_threshold = 0.5
+            
+            # Determine which document has better graph match
+            better_graph_score = max(doc1_graph_score, doc2_graph_score)
+            better_graph_winner = doc1_key if doc1_graph_score > doc2_graph_score else doc2_key
+            better_graph_result = doc1_graph_result if doc1_graph_score > doc2_graph_score else doc2_graph_result
+            
+            # Check if graph should override Phase 4
+            should_override = False
+            
+            if better_graph_score == exact_match_threshold:
+                # EXACT match: Always use graph (structural fact > embeddings)
+                should_override = True
+                graph_confidence = better_graph_score
+                graph_override_reason = f"EXACT match (score={better_graph_score:.2f})"
+            elif better_graph_score >= high_confidence_threshold:
+                # High confidence: Always use graph
+                should_override = True
+                graph_confidence = better_graph_score
+                graph_override_reason = f"High confidence (score={better_graph_score:.2f} ≥ {high_confidence_threshold})"
+            elif better_graph_score >= medium_confidence_threshold:
+                # Medium confidence: Use graph only if it beats BOTH document scores
+                # This is adaptive - graph wins if it's more confident than epistemic modulation
+                if better_graph_score > doc1_sim_phase4 and better_graph_score > doc2_sim_phase4:
+                    should_override = True
+                    graph_confidence = better_graph_score
+                    graph_override_reason = f"Medium confidence beats both docs (graph={better_graph_score:.2f} > docs={doc1_sim_phase4:.2f},{doc2_sim_phase4:.2f})"
+                else:
+                    graph_override_reason = f"Medium confidence doesn't beat docs (graph={better_graph_score:.2f} vs docs={doc1_sim_phase4:.2f},{doc2_sim_phase4:.2f})"
+            else:
+                graph_override_reason = f"Low confidence (score={better_graph_score:.2f} < {medium_confidence_threshold})"
+            
+            # Apply override if conditions met
+            if should_override and doc1_graph_score != doc2_graph_score:
+                phase3_winner = better_graph_winner
+                phase3_override = True
+            elif should_override and doc1_graph_score == doc2_graph_score:
+                graph_override_reason = f"No override: both docs have same graph score ({doc1_graph_score:.2f})"
         
         phase3_correct = (phase3_winner == expected) if use_graph else phase4_correct
         
@@ -324,9 +362,9 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         
         # Verbose output
         if verbose:
-            status_p2 = "✓" if phase2_correct else "✗"
-            status_p4 = "✓" if phase4_correct else "✗"
-            status_p3 = "✓" if (use_graph and phase3_correct) else ""
+            status_p2 = "[P2]" if phase2_correct else "[P2-FAIL]"
+            status_p4 = "[P4]" if phase4_correct else "[P4-FAIL]"
+            status_p3 = "[P3]" if (use_graph and phase3_correct) else ""
             
             print(f"\nCase {i}: {test.get('id', f'unnamed_{i}')}")
             print(f"Query: {query}")
@@ -337,14 +375,25 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
             print()
             print(f"Phase 4: {status_p4} {phase4_winner} (score: {doc2_sim_phase4:.4f} vs {doc1_sim_phase4:.4f})")
             print(f"  Strategy: {strategy}")
-            print(f"  Doc1: P2={doc1_sim_phase2:.4f} × epistemic={doc1_epistemic:.3f} = {doc1_sim_phase4:.4f}")
-            print(f"  Doc2: P2={doc2_sim_phase2:.4f} × epistemic={doc2_epistemic:.3f} = {doc2_sim_phase4:.4f}")
+            print(f"  Doc1: P2={doc1_sim_phase2:.4f} x epistemic={doc1_epistemic:.3f} = {doc1_sim_phase4:.4f}")
+            print(f"  Doc2: P2={doc2_sim_phase2:.4f} x epistemic={doc2_epistemic:.3f} = {doc2_sim_phase4:.4f}")
             
             if use_graph:
+                print(f"\nPhase 3 Graph Analysis:")
+                print(f"  Query classification: {doc1_graph_result['constraints'].get('query_type', 'unknown')}")
+                print(f"  Role: {doc1_graph_result['constraints'].get('role', 'N/A')} | Org: {doc1_graph_result['constraints'].get('org', 'N/A')} | Entity: {doc1_graph_result['constraints'].get('entity', 'N/A')} | Year: {doc1_graph_result['constraints'].get('year', 'N/A')}")
+                print(f"  Directional: {doc1_graph_result['constraints'].get('directional', 'N/A')}")
+                print(f"  Doc1 graph: score={doc1_graph_score:.2f}, match={doc1_graph_result['match_type']}, entity={doc1_graph_result['matched_entity']}")
+                print(f"  Doc2 graph: score={doc2_graph_score:.2f}, match={doc2_graph_result['match_type']}, entity={doc2_graph_result['matched_entity']}")
+                if doc1_graph_result.get('all_matches'):
+                    print(f"  All valid entities: {doc1_graph_result['all_matches']}")
+                
                 if phase3_override:
-                    print(f"\nPhase 3: {status_p3} {phase3_winner} (graph override, confidence: {graph_confidence:.2f})")
+                    print(f"  Override: YES - {graph_override_reason}")
+                    print(f"  Result: {status_p3} {phase3_winner}")
                 else:
-                    print(f"\nPhase 3: {status_p3} {phase3_winner} (no graph override)")
+                    print(f"  Override: NO - {graph_override_reason}")
+                    print(f"  Result: {status_p3} {phase3_winner} (using Phase 4)")
             
             # Show epistemic breakdown
             if abs(doc1_epistemic - doc2_epistemic) > 0.05:
@@ -357,10 +406,10 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
                       f"dependency={doc2_confidence['component_scores']['dependency']:.3f}")
             
             if phase4_correct != phase2_correct:
-                print(f"\n{'🎯 PHASE 4 RESCUE' if phase4_correct else '⚠️ PHASE 4 REGRESSION'}")
+                print(f"\n*** {'PHASE 4 RESCUE' if phase4_correct else 'PHASE 4 REGRESSION'} ***")
             
             if use_graph and phase3_override and phase3_correct != phase4_correct:
-                print(f"{'🎯 PHASE 3 RESCUE' if phase3_correct else '⚠️ PHASE 3 REGRESSION'}")
+                print(f"*** {'PHASE 3 RESCUE' if phase3_correct else 'PHASE 3 REGRESSION'} ***")
         
         # Track failures for summary
         final_correct = phase3_correct if use_graph else phase4_correct
@@ -429,13 +478,13 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
             print(f"Query: {fail['query']}")
             final_winner = fail.get('phase3_winner', fail['phase4_winner'])
             print(f"Expected: {fail['expected']}, Got: {final_winner}")
-            print(f"  Phase 2: {fail['phase2_winner']} ({'✓' if fail['phase2_correct'] else '✗'})")
-            print(f"  Phase 4: {fail['phase4_winner']} ({'✓' if fail['phase4_correct'] else '✗'})")
+            print(f"  Phase 2: {fail['phase2_winner']} ({'OK' if fail['phase2_correct'] else 'FAIL'})")
+            print(f"  Phase 4: {fail['phase4_winner']} ({'OK' if fail['phase4_correct'] else 'FAIL'})")
             if use_graph:
                 override_str = " (graph override)" if fail.get('phase3_override') else ""
                 print(f"  Phase 3: {fail['phase3_winner']}{override_str}")
-            print(f"  Doc1: P2={fail['doc1_phase2']:.4f} × {fail['doc1_epistemic']:.3f} = {fail['doc1_final']:.4f}")
-            print(f"  Doc2: P2={fail['doc2_phase2']:.4f} × {fail['doc2_epistemic']:.3f} = {fail['doc2_final']:.4f}")
+            print(f"  Doc1: P2={fail['doc1_phase2']:.4f} x {fail['doc1_epistemic']:.3f} = {fail['doc1_final']:.4f}")
+            print(f"  Doc2: P2={fail['doc2_phase2']:.4f} x {fail['doc2_epistemic']:.3f} = {fail['doc2_final']:.4f}")
             print(f"  Strategy: {fail['strategy']}")
     elif failures:
         print(f"\n({len(failures)} failures - too many to display individually)")
