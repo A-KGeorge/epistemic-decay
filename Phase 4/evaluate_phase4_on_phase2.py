@@ -33,6 +33,13 @@ from numpy.linalg import norm
 import importlib.util
 import argparse
 
+try:
+    from rank_bm25 import BM25Okapi
+    HAS_BM25 = True
+except ImportError:
+    HAS_BM25 = False
+    print("WARNING: rank_bm25 not installed. BM25 baseline disabled. Run: pip install rank-bm25")
+
 # Add parent directories to path
 phase2_path = Path(__file__).parent.parent / "Phase 2"
 phase4_path = Path(__file__).parent
@@ -118,6 +125,9 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         verbose = False
     
     results = {
+        "standard_correct": 0,
+        "bm25_correct": 0,
+        "recency_correct": 0,
         "phase2_correct": 0,    # Phase 2 temporal alignment
         "phase4_correct": 0,    # Phase 4 multi-dimensional decay
         "phase3_correct": 0 if use_graph else None,  # Phase 3 graph override
@@ -188,7 +198,27 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         # Embed documents with decay
         doc1_vec = embed_with_decay(doc1["text"], doc1_acquired)
         doc2_vec = embed_with_decay(doc2["text"], doc2_acquired, last_verified=doc2_verified)
-        
+
+        # STANDARD BASELINE (cosine similarity, no decay, no intent)
+        doc1_sim_standard = cosine_similarity(query_vec_phase4, doc1_vec[:384])
+        doc2_sim_standard = cosine_similarity(query_vec_phase4, doc2_vec[:384])
+        standard_winner = doc2_key if doc2_sim_standard > doc1_sim_standard else doc1_key
+        standard_correct = (standard_winner == expected)
+
+        # BM25 BASELINE (lexical, no embeddings)
+        bm25_winner = None
+        bm25_correct = False
+        if HAS_BM25:
+            corpus = [doc1["text"].lower().split(), doc2["text"].lower().split()]
+            bm25_model = BM25Okapi(corpus)
+            bm25_scores = bm25_model.get_scores(query.lower().split())
+            bm25_winner = doc2_key if bm25_scores[1] >= bm25_scores[0] else doc1_key
+            bm25_correct = (bm25_winner == expected)
+
+        # RECENCY BASELINE (newer document wins, ignoring content)
+        recency_winner = doc2_key if doc2_acquired >= doc1_acquired else doc1_key
+        recency_correct = (recency_winner == expected)
+
         # PHASE 2: Temporal alignment scoring (base signal)
         from decay_functions import score_with_temporal_alignment
         _, doc1_sim_phase2, _ = score_with_temporal_alignment(
@@ -232,8 +262,8 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
             doc1_days = (now - doc1_acquired).days
             doc2_days = (now - doc2_acquired).days
             
-            doc1_confidence = compute_final_confidence(doc1_decay, doc1_days, query_paradigm_set)
-            doc2_confidence = compute_final_confidence(doc2_decay, doc2_days, query_paradigm_set)
+            doc1_confidence = compute_final_confidence(doc1_decay, doc1_days, query_paradigm_set, query)
+            doc2_confidence = compute_final_confidence(doc2_decay, doc2_days, query_paradigm_set, query)
             
             # Extract ONLY epistemic components (exclude temporal since Phase 2 handles it)
             doc1_epistemic = (
@@ -337,6 +367,12 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         phase3_correct = (phase3_winner == expected) if use_graph else phase4_correct
         
         # Update results
+        if standard_correct:
+            results["standard_correct"] += 1
+        if bm25_correct:
+            results["bm25_correct"] += 1
+        if recency_correct:
+            results["recency_correct"] += 1
         if phase2_correct:
             results["phase2_correct"] += 1
         if phase4_correct:
@@ -439,6 +475,11 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
     print("="*80)
     
     total = len(test_cases)
+    print(f"\nBaselines:")
+    print(f"  Standard (cosine, no decay):       {results['standard_correct']}/{total} ({100*results['standard_correct']/total:.1f}%)")
+    if HAS_BM25:
+        print(f"  BM25 (lexical, no semantics):      {results['bm25_correct']}/{total} ({100*results['bm25_correct']/total:.1f}%)")
+    print(f"  Recency (newest doc wins):         {results['recency_correct']}/{total} ({100*results['recency_correct']/total:.1f}%)")
     print(f"\nAccuracy by Phase:")
     print(f"  Phase 2 (temporal only):           {results['phase2_correct']}/{total} ({100*results['phase2_correct']/total:.1f}%)")
     print(f"  Phase 4 (integrated P2×modifiers): {results['phase4_correct']}/{total} ({100*results['phase4_correct']/total:.1f}%)")

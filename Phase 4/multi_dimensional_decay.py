@@ -118,7 +118,8 @@ def analyze_statement_decay(text: str, acquired_date: Optional[datetime] = None)
 
 def compute_final_confidence(decay_vector: MultiDimensionalDecayVector,
                             days_elapsed: float,
-                            query_paradigm_set: Set[str] = None) -> Dict[str, any]:
+                            query_paradigm_set: Set[str] = None,
+                            query_text: str = "") -> Dict[str, any]:
     """
     Compute final confidence score combining all decay dimensions.
     
@@ -128,10 +129,11 @@ def compute_final_confidence(decay_vector: MultiDimensionalDecayVector,
     - Uncertainty: C = base_confidence (already multiplicative from markers)
     - Dependency: C_effective = C × (1 - λd)
     
-    Args:
+   Args:
         decay_vector: Multi-dimensional decay vector
         days_elapsed: Days since acquisition
         query_paradigm_set: Paradigm context from query
+        query_text: Full query text (for baseline paradigm guard)
     
     Returns:
         {
@@ -158,10 +160,11 @@ def compute_final_confidence(decay_vector: MultiDimensionalDecayVector,
     # 1. Temporal component: exponential decay
     temporal_conf = np.exp(-decay_vector.temporal * days_elapsed)
     
-    # 2. Paradigm component: step function
+    # 2. Paradigm component: step function (with baseline guard)
     paradigm_valid, paradigm_conf = check_paradigm_validity(
         decay_vector.paradigm_set, 
-        query_paradigm_set or set()
+        query_paradigm_set or set(),
+        query_text=query_text
     )
     
     # 3. Uncertainty component: already computed confidence

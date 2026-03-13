@@ -261,25 +261,70 @@ def extract_paradigm_context(text: str) -> Dict[str, any]:
     }
 
 
-def check_paradigm_validity(statement_paradigms: Set[str], query_paradigms: Set[str]) -> Tuple[bool, float]:
+def check_paradigm_validity(statement_paradigms: Set[str], query_paradigms: Set[str], 
+                           query_text: str = "", is_baseline_context: bool = False) -> Tuple[bool, float]:
     """
     Check if statement is valid in query context using conjunctive composition.
     
     Paradigm decay stacks conjunctively: a statement is valid only within the 
     intersection of all its required paradigm contexts.
     
+    NEW: Baseline Paradigm Guard - protects foundational paradigms (Euclidean, Newtonian)
+    from being overridden by specialized modern paradigms unless explicitly requested.
+    
     Args:
         statement_paradigms: Set of paradigms statement requires
         query_paradigms: Set of paradigms in query context
+        query_text: Full query text (for baseline detection)
+        is_baseline_context: True if query wants foundational/baseline answer
     
     Returns:
         (is_valid, confidence)
         - is_valid: True if statement_paradigms ⊆ query_paradigms
         - confidence: 1.0 if valid, 0.0 if invalid (step function)
     """
+    # Import here to avoid circular dependency
+    from query_epistemic_detection import FOUNDATIONAL_PARADIGMS, is_baseline_query
+    
     # If statement has no paradigm scope, it's universally valid
     if not statement_paradigms:
         return True, 1.0
+    
+    # BASELINE PARADIGM GUARD
+    # Check if statement uses a foundational paradigm (Euclidean, Newtonian, etc.)
+    foundational_paradigms_in_statement = [
+        p.lower().replace("_", " ") for p in statement_paradigms
+        if any(f in p.lower().replace("_", " ") for f in FOUNDATIONAL_PARADIGMS)
+    ]
+    
+    # Check if statement uses specialized/modern paradigms
+    SPECIALIZED_PARADIGMS = {
+        "non_euclidean", "non euclidean", "relativistic", "quantum", 
+        "hyperbolic", "elliptic", "riemannian", "special relativity", "general relativity"
+    }
+    specialized_paradigms_in_statement = [
+        p.lower().replace("_", " ") for p in statement_paradigms
+        if any(s in p.lower().replace("_", " ") for s in SPECIALIZED_PARADIGMS)
+    ]
+    
+    # Detect if query wants baseline answer
+    if not is_baseline_context and query_text:
+        is_baseline_context = is_baseline_query(query_text, query_paradigms)
+    
+    # If query wants baseline (foundational) answer:
+    # - Accept PURE foundational statements (Euclidean only): confidence=1.0
+    # - Reject specialized statements (non-Euclidean, relativistic): confidence=0.0
+    # - Mixed statements (both Euclidean AND non-Euclidean): confidence=0.5 (context bleed)
+    if is_baseline_context:
+        if specialized_paradigms_in_statement and not foundational_paradigms_in_statement:
+            # Pure specialized - reject for baseline queries
+            return False, 0.0
+        elif specialized_paradigms_in_statement and foundational_paradigms_in_statement:
+            # Mixed paradigms - penalize but don't fully reject (context bleed)
+            return True, 0.5
+        elif foundational_paradigms_in_statement:
+            # Pure foundational - protect for baseline queries
+            return True, 1.0
     
     # If query has no paradigm context specified, assume universal context
     # (accept all paradigm-scoped statements)
@@ -320,7 +365,10 @@ def compute_paradigm_decay_score(statement: str, query: str) -> Dict[str, any]:
     statement_paradigms = statement_ctx["paradigm_set"]
     query_paradigms = query_ctx["paradigm_set"]
     
-    is_valid, confidence = check_paradigm_validity(statement_paradigms, query_paradigms)
+    # Pass query_text for baseline paradigm guard
+    is_valid, confidence = check_paradigm_validity(
+        statement_paradigms, query_paradigms, query_text=query
+    )
     
     matched = statement_paradigms & query_paradigms
     

@@ -16,6 +16,13 @@ import numpy as np
 from numpy.linalg import norm
 import importlib.util
 
+try:
+    from rank_bm25 import BM25Okapi
+    HAS_BM25 = True
+except ImportError:
+    HAS_BM25 = False
+    print("WARNING: rank_bm25 not installed. BM25 baseline disabled. Run: pip install rank-bm25")
+
 # Load Phase 1 module
 phase1_path = Path(__file__).parent.parent / "Phase 1"
 sys.path.insert(0, str(phase1_path))
@@ -113,6 +120,8 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
     
     results = {
         "standard_correct": 0,
+        "bm25_correct": 0,
+        "recency_correct": 0,
         "phase1_correct": 0,
         "phase2_correct": 0,
         "phase3_correct": 0 if use_graph else None,
@@ -188,7 +197,21 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
         doc2_sim_standard = cosine_similarity(query_vec_phase1[:384], doc2_vec[:384])
         standard_winner = doc2_key if doc2_sim_standard > doc1_sim_standard else doc1_key
         standard_correct = (standard_winner == expected)
-        
+
+        # BM25 BASELINE (lexical, no embeddings)
+        bm25_winner = None
+        bm25_correct = False
+        if HAS_BM25:
+            corpus = [doc1["text"].lower().split(), doc2["text"].lower().split()]
+            bm25_model = BM25Okapi(corpus)
+            bm25_scores = bm25_model.get_scores(query.lower().split())
+            bm25_winner = doc2_key if bm25_scores[1] >= bm25_scores[0] else doc1_key
+            bm25_correct = (bm25_winner == expected)
+
+        # RECENCY BASELINE (newer document wins, ignoring content)
+        recency_winner = doc2_key if doc2_acquired >= doc1_acquired else doc1_key
+        recency_correct = (recency_winner == expected)
+
         # PHASE 1 (document decay only)
         doc1_sim_phase1 = cosine_similarity(query_vec_phase1, doc1_vec)
         doc2_sim_phase1 = cosine_similarity(query_vec_phase1, doc2_vec)
@@ -219,6 +242,10 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
         # Update results
         if standard_correct:
             results["standard_correct"] += 1
+        if bm25_correct:
+            results["bm25_correct"] += 1
+        if recency_correct:
+            results["recency_correct"] += 1
         if phase1_correct:
             results["phase1_correct"] += 1
         if phase2_correct:
@@ -248,6 +275,9 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
                 print(f"  Years: {query_intent['years']}")
             print(f"  Expected winner: {expected}")
             print(f"  Standard: {'OK' if standard_correct else 'FAIL'} ({standard_winner})")
+            if HAS_BM25 and bm25_winner:
+                print(f"  BM25:     {'OK' if bm25_correct else 'FAIL'} ({bm25_winner})")
+            print(f"  Recency:  {'OK' if recency_correct else 'FAIL'} ({recency_winner})")
             print(f"  Phase 1:  {'OK' if phase1_correct else 'FAIL'} ({phase1_winner})")
             print(f"  Phase 2:  {'OK' if phase2_correct else 'FAIL'} ({phase2_winner}) (align: {doc1_key}={doc1_align:.2f}, {doc2_key}={doc2_align:.2f})")
             if use_graph:
@@ -270,6 +300,9 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
     print("RESULTS SUMMARY")
     print("="*80)
     print(f"Standard:  {results['standard_correct']}/{total} ({100*results['standard_correct']/total:.1f}%)")
+    if HAS_BM25:
+        print(f"BM25:      {results['bm25_correct']}/{total} ({100*results['bm25_correct']/total:.1f}%)")
+    print(f"Recency:   {results['recency_correct']}/{total} ({100*results['recency_correct']/total:.1f}%)")
     print(f"Phase 1:   {results['phase1_correct']}/{total} ({100*results['phase1_correct']/total:.1f}%)")
     print(f"Phase 2:   {results['phase2_correct']}/{total} ({100*results['phase2_correct']/total:.1f}%)")
     if use_graph:

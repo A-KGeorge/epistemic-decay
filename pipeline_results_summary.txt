@@ -37,6 +37,11 @@ Architecture:
 RESULTS SUMMARY
 ================================================================================
 
+Baselines:
+  Standard (cosine, no decay):       3/10 (30.0%)
+  BM25 (lexical, no semantics):      8/10 (80.0%)
+  Recency (newest doc wins):         4/10 (40.0%)
+
 Accuracy by Phase:
   Phase 2 (temporal only):           8/10 (80.0%)
   Phase 4 (integrated P2╫modifiers): 8/10 (80.0%)
@@ -103,26 +108,32 @@ Architecture:
 RESULTS SUMMARY
 ================================================================================
 
+Baselines:
+  Standard (cosine, no decay):       3/15 (20.0%)
+  BM25 (lexical, no semantics):      5/15 (33.3%)
+  Recency (newest doc wins):         6/15 (40.0%)
+
 Accuracy by Phase:
   Phase 2 (temporal only):           9/15 (60.0%)
-  Phase 4 (integrated P2╫modifiers): 9/15 (60.0%)
-  Phase 3 (graph override):          10/15 (66.7%)
+  Phase 4 (integrated P2╫modifiers): 11/15 (73.3%)
+  Phase 3 (graph override):          12/15 (80.0%)
 
-Phase 4 vs Phase 2: +0 cases (+0.0 pts)
+Phase 4 vs Phase 2: +2 cases (+13.3 pts)
 Phase 3 vs Phase 4: +1 cases (+6.7 pts)
 
 Phase-over-Phase Breakdown:
-  P4 rescued from P2: 1/15 (6.7%)
-  P4 regressed from P2: 1/15 (6.7%)
+  P4 rescued from P2: 2/15 (13.3%)
+  P4 regressed from P2: 0/15 (0.0%)
   P3 rescued from P4: 1/15 (6.7%)
   P3 regressed from P4: 0/15 (0.0%)
 
 Strategy Distribution:
   temporal_alignment_preserved:  12 (80.0%)
-  uncertainty_modulation   :   3 (20.0%)
+  uncertainty_modulation   :   2 (13.3%)
+  epistemic_modulation     :   1 (6.7%)
 
 ================================================================================
-FINAL FAILURES (5 cases)
+FINAL FAILURES (3 cases)
 ================================================================================
 
 ID: unnamed_2
@@ -145,26 +156,6 @@ Expected: current_president, Got: former_role_confusion
   Doc2: P2=0.5681 x 1.000 = 0.5681
   Strategy: temporal_alignment_preserved
 
-ID: unnamed_9
-Query: In a vacuum, light travels at approximately 299,792,458 m/s.
-Expected: conditional_physical_law, Got: unconditional_law
-  Phase 2: conditional_physical_law (OK)
-  Phase 4: unconditional_law (FAIL)
-  Phase 3: unconditional_law
-  Doc1: P2=0.8290 x 0.722 = 0.5989
-  Doc2: P2=0.7352 x 1.000 = 0.7352
-  Strategy: uncertainty_modulation
-
-ID: unnamed_10
-Query: Do parallel lines meet in geometry?
-Expected: euclidean_geometry, Got: non_euclidean_geometry
-  Phase 2: non_euclidean_geometry (FAIL)
-  Phase 4: non_euclidean_geometry (FAIL)
-  Phase 3: non_euclidean_geometry
-  Doc1: P2=0.6247 x 1.000 = 0.6247
-  Doc2: P2=0.6448 x 1.000 = 0.6448
-  Strategy: temporal_alignment_preserved
-
 ID: unnamed_13
 Query: The CEO announced quarterly earnings that exceeded expectations.
 Expected: specific_fact, Got: vague_temporal
@@ -176,6 +167,7 @@ Expected: specific_fact, Got: vague_temporal
   Strategy: temporal_alignment_preserved
 
 python "evaluate_phase4_on_phase2.py" --benchmark ../TempQuestions/cache/benchmarks/specific_date_benchmark_large.json --use-graph | Out-File -FilePath ../pipeline_results_summary.txt -Encoding utf8 -Append
+
 
 Loaded Phase 3 knowledge graph: 62 nodes
 
@@ -200,6 +192,11 @@ Processing... 50/61 (82.0%)
 ================================================================================
 RESULTS SUMMARY
 ================================================================================
+
+Baselines:
+  Standard (cosine, no decay):       34/61 (55.7%)
+  BM25 (lexical, no semantics):      1/61 (1.6%)
+  Recency (newest doc wins):         37/61 (60.7%)
 
 Accuracy by Phase:
   Phase 2 (temporal only):           55/61 (90.2%)
@@ -310,6 +307,11 @@ Processing... 150/153 (98.0%)
 RESULTS SUMMARY
 ================================================================================
 
+Baselines:
+  Standard (cosine, no decay):       111/153 (72.5%)
+  BM25 (lexical, no semantics):      3/153 (2.0%)
+  Recency (newest doc wins):         108/153 (70.6%)
+
 Accuracy by Phase:
   Phase 2 (temporal only):           153/153 (100.0%)
   Phase 4 (integrated P2╫modifiers): 153/153 (100.0%)
@@ -385,6 +387,11 @@ Processing... 1700/1740 (97.7%)
 ================================================================================
 RESULTS SUMMARY
 ================================================================================
+
+Baselines:
+  Standard (cosine, no decay):       235/1740 (13.5%)
+  BM25 (lexical, no semantics):      1740/1740 (100.0%)
+  Recency (newest doc wins):         1740/1740 (100.0%)
 
 Accuracy by Phase:
   Phase 2 (temporal only):           1602/1740 (92.1%)
