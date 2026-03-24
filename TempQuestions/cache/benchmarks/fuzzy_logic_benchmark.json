@@ -1,0 +1,230 @@
+{
+  "description": "Fuzzy Logic Test Cases - Phase 2 Enhancements",
+  "test_cases": [
+    {
+      "case_id": "A",
+      "query": "The current CEO knows the Pythagorean theorem is always true.",
+      "documents": {
+        "contaminated_zero_decay": {
+          "text": "The current CEO knows the Pythagorean theorem is always true.",
+          "acquired": "2024-01-15",
+          "is_correct": false,
+          "reasoning": "Fragility Rule violated - 'current CEO' contaminates zero-decay status of theorem"
+        },
+        "pure_mathematical": {
+          "text": "The Pythagorean theorem states that a² + b² = c² for right triangles.",
+          "acquired": "2024-01-15",
+          "is_correct": true,
+          "reasoning": "Pure mathematical truth with no contaminating components"
+        }
+      },
+      "expected_winner": "pure_mathematical",
+      "difficulty": "advanced",
+      "category": "compositional_contamination",
+      "gemini_case": "A: Recursive Contamination (Fragility Rule)"
+    },
+    {
+      "case_id": "B",
+      "query": "In 1998, what was the current population of Tokyo?",
+      "documents": {
+        "from_1998": {
+          "text": "Tokyo's population in 1998 was approximately 11.8 million.",
+          "acquired": "1998-06-01",
+          "is_correct": true,
+          "era": "1998",
+          "reasoning": "Document from 1998 with 'current' interpreted as 1998's present"
+        },
+        "from_2024": {
+          "text": "Tokyo's current population is approximately 14.1 million.",
+          "acquired": "2024-01-15",
+          "is_correct": false,
+          "era": "2024",
+          "reasoning": "'Current' in 2024 context, but query asks for 1998 data"
+        }
+      },
+      "expected_winner": "from_1998",
+      "difficulty": "advanced",
+      "category": "multi_marker_conflict",
+      "gemini_case": "B: Multi-Marker Conflict"
+    },
+    {
+      "case_id": "C",
+      "query": "Who leads the company since Tim Cook's departure?",
+      "synthetic": true,
+      "synthetic_note": "This case uses fictional future data. Tim Cook's 2025 departure and 'Sarah Chen' as Apple CEO are invented for test purposes and are not factual claims about real events.",
+      "documents": {
+        "post_transition_ceo": {
+          "text": "After Tim Cook stepped down in 2025, Sarah Chen became Apple's new CEO.",
+          "acquired": "2025-08-01",
+          "is_correct": true,
+          "reasoning": "'Since departure' creates lower-bounded temporal window from 2025 onward",
+          "note": "Fictional future data — synthetic test case, not a real event"
+        },
+        "tim_cook_era": {
+          "text": "Tim Cook has been Apple's CEO since 2011, succeeding Steve Jobs.",
+          "acquired": "2023-05-01",
+          "is_correct": false,
+          "reasoning": "Document predates the 'since departure' temporal window"
+        }
+      },
+      "expected_winner": "post_transition_ceo",
+      "difficulty": "advanced",
+      "category": "directional_operator",
+      "gemini_case": "C: Relative Directional Operators"
+    },
+    {
+      "case_id": "D",
+      "query": "Who is the founder of the company?",
+      "documents": {
+        "founder_historical": {
+          "text": "Steve Jobs and Steve Wozniak founded Apple Computer in 1976.",
+          "acquired": "2020-03-01",
+          "is_correct": true,
+          "reasoning": "'Founder' is inherently historical role - should be sealed despite present tense query"
+        },
+        "current_ceo": {
+          "text": "Tim Cook is the current CEO of Apple, leading since 2011.",
+          "acquired": "2024-01-15",
+          "is_correct": false,
+          "reasoning": "Current leadership, not founding - query asks for founder specifically"
+        }
+      },
+      "expected_winner": "founder_historical",
+      "difficulty": "medium",
+      "category": "role_based_sealing",
+      "gemini_case": "D: Institutional Legacy vs. Present Tense"
+    },
+    {
+      "case_id": "E",
+      "query": "What was the policy before the 2024 election?",
+      "documents": {
+        "pre_election_2023": {
+          "text": "In 2023, the immigration policy required visa approval within 30 days.",
+          "acquired": "2023-09-01",
+          "is_correct": true,
+          "reasoning": "Document from before Nov 2024 - within exclusionary temporal window"
+        },
+        "post_election_2024": {
+          "text": "After the 2024 election, the new policy extended visa approval to 60 days.",
+          "acquired": "2024-12-15",
+          "is_correct": false,
+          "reasoning": "Document from after Nov 2024 - violates 'before' exclusionary constraint"
+        }
+      },
+      "expected_winner": "pre_election_2023",
+      "difficulty": "advanced",
+      "category": "negative_temporal_intent",
+      "gemini_case": "E: Negative Temporal Intent"
+    },
+    {
+      "case_id": "F",
+      "query": "Who was the leader of the UK around the turn of the millennium?",
+      "documents": {
+        "tony_blair_1999": {
+          "text": "Tony Blair served as UK Prime Minister from 1997 to 2007, leading during the millennium transition.",
+          "acquired": "1999-12-01",
+          "is_correct": true,
+          "reasoning": "Fuzzy parsing: 'turn of millennium' = 1998-2002 range, Blair was PM"
+        },
+        "david_cameron_2012": {
+          "text": "David Cameron became UK Prime Minister in 2010, leading the Conservative government.",
+          "acquired": "2012-06-01",
+          "is_correct": false,
+          "reasoning": "Cameron's era (2010+) is outside the millennium turn window"
+        }
+      },
+      "expected_winner": "tony_blair_1999",
+      "difficulty": "advanced",
+      "category": "fuzzy_timeline_parsing",
+      "gemini_case": "Fuzzy Timeline Test (from edge_cases)"
+    },
+    {
+      "case_id": "G",
+      "query": "Who was the CEO of Apple before Tim Cook?",
+      "documents": {
+        "steve_jobs_2005": {
+          "text": "Steve Jobs served as Apple CEO from 1997 until his resignation in 2011.",
+          "acquired": "2005-06-01",
+          "is_correct": true,
+          "reasoning": "'Before Tim Cook' = exclusionary window ending at 2011, Jobs era"
+        },
+        "tim_cook_2018": {
+          "text": "Tim Cook has been Apple's CEO since 2011, taking over from Steve Jobs.",
+          "acquired": "2018-03-01",
+          "is_correct": false,
+          "reasoning": "Tim Cook is the reference point - query asks for predecessor"
+        }
+      },
+      "expected_winner": "steve_jobs_2005",
+      "difficulty": "medium",
+      "category": "directional_operator",
+      "gemini_case": "Directional 'Before' Test (from edge_cases)"
+    },
+    {
+      "case_id": "H",
+      "query": "Who became the Prime Minister after Margaret Thatcher?",
+      "documents": {
+        "john_major_successor": {
+          "text": "John Major succeeded Margaret Thatcher as Prime Minister in 1990, serving until 1997.",
+          "acquired": "1995-03-01",
+          "is_correct": true,
+          "reasoning": "'After Thatcher' = directional operator for successor, Major is correct"
+        },
+        "margaret_thatcher_herself": {
+          "text": "Margaret Thatcher served as UK Prime Minister from 1979 to 1990.",
+          "acquired": "1988-06-01",
+          "is_correct": false,
+          "reasoning": "Query asks for successor, not Thatcher herself"
+        }
+      },
+      "expected_winner": "john_major_successor",
+      "difficulty": "medium",
+      "category": "directional_operator",
+      "gemini_case": "Directional 'After' Test (from edge_cases)"
+    },
+    {
+      "case_id": "I",
+      "query": "What companies does Elon Musk lead?",
+      "documents": {
+        "concurrent_roles": {
+          "text": "Elon Musk currently serves as CEO of Tesla, SpaceX, and X (formerly Twitter).",
+          "acquired": "2024-01-15",
+          "is_correct": true,
+          "reasoning": "Query is present tense ('does lead') - needs current multi-role answer"
+        },
+        "outdated_single": {
+          "text": "Elon Musk is the CEO of Tesla, the electric vehicle manufacturer.",
+          "acquired": "2018-06-01",
+          "is_correct": false,
+          "reasoning": "Outdated - missing SpaceX and X, incomplete current picture"
+        }
+      },
+      "expected_winner": "concurrent_roles",
+      "difficulty": "easy",
+      "category": "current_preference",
+      "gemini_case": "Multi-role concurrent leadership (from edge_cases)"
+    },
+    {
+      "case_id": "J",
+      "query": "Who was the former US President?",
+      "documents": {
+        "current_president": {
+          "text": "The current US President is Joe Biden, serving since January 2021.",
+          "acquired": "2024-01-15",
+          "is_correct": false,
+          "reasoning": "Stale document — Biden was president, query uses past tense 'was', disfavoring current-frame docs"
+        },
+        "former_role_confusion": {
+          "text": "Donald Trump served as US President from 2017 to 2021, succeeded by Joe Biden.",
+          "acquired": "2021-03-01",
+          "is_correct": true,
+          "reasoning": "Historical transition document — past tense 'was' triggers historical boost, favoring this older transition record"
+        }
+      },
+      "expected_winner": "former_role_confusion",
+      "difficulty": "advanced",
+      "category": "historical_boost",
+      "gemini_case": "Historical Boost Test — past tense 'was' should prefer historical transition document over stale current-frame document"
+    }
+  ]
+}

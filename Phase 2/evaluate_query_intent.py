@@ -115,8 +115,7 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
     
     # Auto-detect quiet mode for large benchmarks
     if len(test_cases) > 100 and verbose:
-        print(f"Auto-detected large-scale benchmark, using quiet mode.")
-        verbose = False
+        pass
     
     results = {
         "standard_correct": 0,
@@ -156,7 +155,7 @@ def evaluate_query_intent(benchmark_file: str = "cache/benchmarks/tempquestions_
             print(f"Processing... {i}/{len(test_cases)} ({100*i/len(test_cases):.1f}%)")
         
         # Use original_question if requested (for temporal queries with years)
-        query = test.get("original_question", test["query"]) if use_original else test["query"]
+        query = test.get("original_question", test.get("query", test.get("Question", ""))) if use_original else test.get("query", test.get("Question", ""))
         
         # Handle different benchmark formats
         if "documents" in test and "stale" in test["documents"]:

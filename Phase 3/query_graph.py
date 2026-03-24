@@ -32,7 +32,10 @@ ROLE_KEYWORDS = {
     "President", "Prime Minister", "PM",
     "founder", "co-founder",
     "Chairman", "CTO", "CFO",
-    "leader", "head"
+    "leader", "head",
+    "director", "directed",
+    "producer", "produced",
+    "screenwriter", "composer"
 }
 
 # Directional operators
@@ -111,19 +114,19 @@ def extract_query_constraints(query: str) -> Dict:
             
             # Extract role from main question only
             for role in ROLE_KEYWORDS:
-                if role.lower() in main_question:
+                if re.search(rf"\b{role.lower()}\b", main_question):
                     constraints["role"] = role
                     break
         else:
             # Fallback to normal extraction
             for role in ROLE_KEYWORDS:
-                if role.lower() in query_lower:
+                if re.search(rf"\b{role.lower()}\b", query_lower):
                     constraints["role"] = role
                     break
     else:
         # Normal role extraction for non-while queries
         for role in ROLE_KEYWORDS:
-            if role.lower() in query_lower:
+            if re.search(rf"\b{role.lower()}\b", query_lower):
                 constraints["role"] = role
                 break
     
@@ -147,7 +150,7 @@ def extract_query_constraints(query: str) -> Dict:
     if not constraints["org"] and constraints["entity"]:
         # Check if query contains corporate role keywords
         corporate_roles = ["ceo", "cto", "cfo", "chairman", "chief executive"]
-        has_corporate_role = any(role in query_lower for role in corporate_roles)
+        has_corporate_role = any(re.search(rf"\b{role}\b", query_lower) for role in corporate_roles)
         
         # If there's a corporate role and no real organization found, the "person" is likely the org
         if has_corporate_role:
@@ -165,9 +168,11 @@ def extract_query_constraints(query: str) -> Dict:
         inferred_org = extract_org_from_context(query, constraints["role"])
         if inferred_org:
             constraints["org"] = inferred_org
-    
+
     # Infer query type (do this after org inference)
-    if constraints["year"] and constraints["role"] and constraints["org"]:
+    if constraints["org"] == "film" and constraints["role"]:
+        constraints["query_type"] = "film_role"
+    elif constraints["year"] and constraints["role"] and constraints["org"]:
         constraints["query_type"] = "specific_role_year"
     elif constraints["directional"] == "while" and constraints["entity"]:
         constraints["query_type"] = "temporal_overlap"
@@ -211,6 +216,10 @@ def extract_org_from_context(query: str, role: str) -> Optional[str]:
     if "france" in query_lower or "french" in query_lower:
         return "France"
     
+    # Film production roles
+    if role in ["director", "producer", "screenwriter", "composer", "directed", "produced"]:
+        return "film"
+
     return None
 
 
@@ -275,7 +284,7 @@ def match_query_to_graph(query: str, knowledge_graph) -> Dict:
     elif constraints["query_type"] == "founder":
         org = constraints["org"]
         role = constraints.get("role", "founder")
-        
+
         if org and role:
             # Founders typically don't have end dates in their founding role
             # Or we look for earliest role holder
@@ -284,7 +293,14 @@ def match_query_to_graph(query: str, knowledge_graph) -> Dict:
                 # Take earliest by start_date
                 matches.append(all_holders[0]["entity"])
                 match_score = 1.0
-    
+
+    # Query graph for film role (specifically designed to map director/producer)
+    elif constraints["query_type"] == "film_role":
+        entity = constraints["entity"]
+        if entity and entity in knowledge_graph.graph.nodes:
+            matches.append(entity)
+            match_score = 1.0
+
     return {
         "constraints": constraints,
         "matches": matches,

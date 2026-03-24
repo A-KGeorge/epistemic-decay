@@ -308,18 +308,23 @@ def evaluate_benchmark(benchmark_file: str, verbose: bool = True, use_original: 
         graph_override_reason = "Graph not enabled"
         
         if use_graph:
-            from graph_matching import compute_graph_alignment
+            from graph_matching import compute_graph_alignment, compute_era_adjusted_score
             
             # Try graph matching with document text for entity-aware matching
             doc1_graph_result = compute_graph_alignment(query, knowledge_graph, doc1_acquired, doc1["text"])
             doc2_graph_result = compute_graph_alignment(query, knowledge_graph, doc2_acquired, doc2["text"])
             
-            doc1_graph_score = doc1_graph_result["score"]
-            doc2_graph_score = doc2_graph_result["score"]
-            
-            # ADAPTIVE CONFIDENCE THRESHOLD:
-            # 1. EXACT match (score = 1.0): Always override (structural fact beats embeddings)
-            # 2. High confidence (≥ 0.8): Use graph for strong NEAR_MATCH
+            query_year_extracted = query_intent.get("years", [None])[0] if query_intent.get("years") else None
+
+            if doc1_graph_result["score"] > 0:
+                doc1_graph_score = compute_era_adjusted_score(doc1_graph_result, doc1_acquired, query_year_extracted)
+            else:
+                doc1_graph_score = doc1_graph_result["score"]
+
+            if doc2_graph_result["score"] > 0:
+                doc2_graph_score = compute_era_adjusted_score(doc2_graph_result, doc2_acquired, query_year_extracted)
+            else:
+                doc2_graph_score = doc2_graph_result["score"]
             # 3. Medium confidence (0.5-0.8): Use graph if it beats BOTH document scores
             # 4. Low confidence (< 0.5): Ignore graph, use Phase 4 scores
             

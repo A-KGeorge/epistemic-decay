@@ -8,15 +8,23 @@
     ],
     "format": "Each case has entities, roles, and successions in temporal order"
   },
-  
   "amazon_ceo_2021": {
     "query": "Who was Amazon's CEO in 2021?",
     "expected_answer": "Andy Jassy",
     "query_year": 2021,
     "entities": [
-      {"name": "Amazon", "type": "ORG"},
-      {"name": "Jeff Bezos", "type": "PERSON"},
-      {"name": "Andy Jassy", "type": "PERSON"}
+      {
+        "name": "Amazon",
+        "type": "ORG"
+      },
+      {
+        "name": "Jeff Bezos",
+        "type": "PERSON"
+      },
+      {
+        "name": "Andy Jassy",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -44,17 +52,41 @@
       }
     ],
     "challenge": "continuity",
-    "reasoning": "Same person (Jassy) holds role in both 2021 and 2024, embeddings nearly identical"
+    "reasoning": "Same person (Jassy) holds role in both 2021 and 2024, embeddings nearly identical",
+    "facts": [
+      {
+        "entity": "Jeff Bezos",
+        "organization": "Amazon",
+        "role": "CEO",
+        "start_year": 1994,
+        "end_year": 2021
+      },
+      {
+        "entity": "Andy Jassy",
+        "organization": "Amazon",
+        "role": "CEO",
+        "start_year": 2021,
+        "end_year": null
+      }
+    ]
   },
-  
   "netflix_ceo_2020": {
     "query": "Who was the CEO of Netflix in 2020?",
     "expected_answer": "Ted Sarandos",
     "query_year": 2020,
     "entities": [
-      {"name": "Netflix", "type": "ORG"},
-      {"name": "Reed Hastings", "type": "PERSON"},
-      {"name": "Ted Sarandos", "type": "PERSON"}
+      {
+        "name": "Netflix",
+        "type": "ORG"
+      },
+      {
+        "name": "Reed Hastings",
+        "type": "PERSON"
+      },
+      {
+        "name": "Ted Sarandos",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -82,18 +114,45 @@
       }
     ],
     "challenge": "continuity",
-    "reasoning": "Sarandos holds role in both 2020 and 2023, minimal semantic difference"
+    "reasoning": "Sarandos holds role in both 2020 and 2023, minimal semantic difference",
+    "facts": [
+      {
+        "entity": "Reed Hastings",
+        "organization": "Netflix",
+        "role": "CEO",
+        "start_year": 1999,
+        "end_year": 2020
+      },
+      {
+        "entity": "Ted Sarandos",
+        "organization": "Netflix",
+        "role": "CEO",
+        "start_year": 2020,
+        "end_year": null
+      }
+    ]
   },
-  
   "google_ceo_2001": {
     "query": "Who was Google's CEO in 2001?",
     "expected_answer": "Eric Schmidt",
     "query_year": 2001,
     "entities": [
-      {"name": "Google", "type": "ORG"},
-      {"name": "Larry Page", "type": "PERSON"},
-      {"name": "Eric Schmidt", "type": "PERSON"},
-      {"name": "Sundar Pichai", "type": "PERSON"}
+      {
+        "name": "Google",
+        "type": "ORG"
+      },
+      {
+        "name": "Larry Page",
+        "type": "PERSON"
+      },
+      {
+        "name": "Eric Schmidt",
+        "type": "PERSON"
+      },
+      {
+        "name": "Sundar Pichai",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -149,19 +208,63 @@
       }
     ],
     "challenge": "small_gap",
-    "reasoning": "3-year gap between 1998 and 2001, both during early Google era with founder context"
+    "reasoning": "3-year gap between 1998 and 2001, both during early Google era with founder context",
+    "facts": [
+      {
+        "entity": "Larry Page",
+        "organization": "Google",
+        "role": "CEO",
+        "start_year": 1998,
+        "end_year": 2001
+      },
+      {
+        "entity": "Eric Schmidt",
+        "organization": "Google",
+        "role": "CEO",
+        "start_year": 2001,
+        "end_year": 2011
+      },
+      {
+        "entity": "Larry Page",
+        "organization": "Google",
+        "role": "CEO",
+        "start_year": 2011,
+        "end_year": 2015
+      },
+      {
+        "entity": "Sundar Pichai",
+        "organization": "Google",
+        "role": "CEO",
+        "start_year": 2015,
+        "end_year": null
+      }
+    ]
   },
-  
   "france_president_2007": {
     "query": "Who was the President of France in 2007?",
     "expected_answer": "Nicolas Sarkozy",
     "query_year": 2007,
     "entities": [
-      {"name": "France", "type": "ORG"},
-      {"name": "Jacques Chirac", "type": "PERSON"},
-      {"name": "Nicolas Sarkozy", "type": "PERSON"},
-      {"name": "François Hollande", "type": "PERSON"},
-      {"name": "Emmanuel Macron", "type": "PERSON"}
+      {
+        "name": "France",
+        "type": "ORG"
+      },
+      {
+        "name": "Jacques Chirac",
+        "type": "PERSON"
+      },
+      {
+        "name": "Nicolas Sarkozy",
+        "type": "PERSON"
+      },
+      {
+        "name": "Fran\u00c3\u00a7ois Hollande",
+        "type": "PERSON"
+      },
+      {
+        "name": "Emmanuel Macron",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -179,7 +282,7 @@
         "end_date": "2012-05-15"
       },
       {
-        "entity": "François Hollande",
+        "entity": "Fran\u00c3\u00a7ois Hollande",
         "role": "President",
         "org": "France",
         "start_date": "2012-05-15",
@@ -203,13 +306,13 @@
       },
       {
         "predecessor": "Nicolas Sarkozy",
-        "successor": "François Hollande",
+        "successor": "Fran\u00c3\u00a7ois Hollande",
         "role": "President",
         "org": "France",
         "transition_date": "2012-05-15"
       },
       {
-        "predecessor": "François Hollande",
+        "predecessor": "Fran\u00c3\u00a7ois Hollande",
         "successor": "Emmanuel Macron",
         "role": "President",
         "org": "France",
@@ -217,19 +320,63 @@
       }
     ],
     "challenge": "small_gap",
-    "reasoning": "5-year gap between 2007 and 2012, different people but similar political context"
+    "reasoning": "5-year gap between 2007 and 2012, different people but similar political context",
+    "facts": [
+      {
+        "entity": "Jacques Chirac",
+        "organization": "France",
+        "role": "President",
+        "start_year": 1995,
+        "end_year": 2007
+      },
+      {
+        "entity": "Nicolas Sarkozy",
+        "organization": "France",
+        "role": "President",
+        "start_year": 2007,
+        "end_year": 2012
+      },
+      {
+        "entity": "Fran\u00c3\u00a7ois Hollande",
+        "organization": "France",
+        "role": "President",
+        "start_year": 2012,
+        "end_year": 2017
+      },
+      {
+        "entity": "Emmanuel Macron",
+        "organization": "France",
+        "role": "President",
+        "start_year": 2017,
+        "end_year": null
+      }
+    ]
   },
-  
   "twitter_ceo_2008": {
     "query": "Who was the CEO of Twitter or X in 2008?",
     "expected_answer": "Evan Williams",
     "query_year": 2008,
     "entities": [
-      {"name": "Twitter", "type": "ORG"},
-      {"name": "Jack Dorsey", "type": "PERSON"},
-      {"name": "Evan Williams", "type": "PERSON"},
-      {"name": "Dick Costolo", "type": "PERSON"},
-      {"name": "Elon Musk", "type": "PERSON"}
+      {
+        "name": "Twitter",
+        "type": "ORG"
+      },
+      {
+        "name": "Jack Dorsey",
+        "type": "PERSON"
+      },
+      {
+        "name": "Evan Williams",
+        "type": "PERSON"
+      },
+      {
+        "name": "Dick Costolo",
+        "type": "PERSON"
+      },
+      {
+        "name": "Elon Musk",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -299,18 +446,66 @@
       }
     ],
     "challenge": "small_gap",
-    "reasoning": "2-year gap between 2006 and 2008, both founders of Twitter, strong semantic similarity"
+    "reasoning": "2-year gap between 2006 and 2008, both founders of Twitter, strong semantic similarity",
+    "facts": [
+      {
+        "entity": "Jack Dorsey",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2006,
+        "end_year": 2008
+      },
+      {
+        "entity": "Evan Williams",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2008,
+        "end_year": 2010
+      },
+      {
+        "entity": "Dick Costolo",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2010,
+        "end_year": 2015
+      },
+      {
+        "entity": "Jack Dorsey",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2015,
+        "end_year": 2021
+      },
+      {
+        "entity": "Elon Musk",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2022,
+        "end_year": null
+      }
+    ]
   },
-  
   "twitter_ceo_2010": {
     "query": "Who was the CEO of Twitter or X in 2010?",
     "expected_answer": "Dick Costolo",
     "query_year": 2010,
     "entities": [
-      {"name": "Twitter", "type": "ORG"},
-      {"name": "Jack Dorsey", "type": "PERSON"},
-      {"name": "Evan Williams", "type": "PERSON"},
-      {"name": "Dick Costolo", "type": "PERSON"}
+      {
+        "name": "Twitter",
+        "type": "ORG"
+      },
+      {
+        "name": "Jack Dorsey",
+        "type": "PERSON"
+      },
+      {
+        "name": "Evan Williams",
+        "type": "PERSON"
+      },
+      {
+        "name": "Dick Costolo",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -352,17 +547,48 @@
       }
     ],
     "challenge": "small_gap",
-    "reasoning": "4-year gap between 2006 and 2010, founder era has stronger semantic similarity"
+    "reasoning": "4-year gap between 2006 and 2010, founder era has stronger semantic similarity",
+    "facts": [
+      {
+        "entity": "Jack Dorsey",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2006,
+        "end_year": 2008
+      },
+      {
+        "entity": "Evan Williams",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2008,
+        "end_year": 2010
+      },
+      {
+        "entity": "Dick Costolo",
+        "organization": "Twitter",
+        "role": "CEO",
+        "start_year": 2010,
+        "end_year": 2015
+      }
+    ]
   },
-  
   "apple_ceo_succession_before": {
     "query": "Who was the CEO of Apple before Tim Cook?",
     "expected_answer": "Steve Jobs",
     "query_type": "succession",
     "entities": [
-      {"name": "Apple", "type": "ORG"},
-      {"name": "Steve Jobs", "type": "PERSON"},
-      {"name": "Tim Cook", "type": "PERSON"}
+      {
+        "name": "Apple",
+        "type": "ORG"
+      },
+      {
+        "name": "Steve Jobs",
+        "type": "PERSON"
+      },
+      {
+        "name": "Tim Cook",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -390,16 +616,37 @@
       }
     ],
     "challenge": "directional_query",
-    "reasoning": "Directional operator 'before' requires graph succession chain, not just year matching"
+    "reasoning": "Directional operator 'before' requires graph succession chain, not just year matching",
+    "facts": [
+      {
+        "entity": "Steve Jobs",
+        "organization": "Apple",
+        "role": "CEO",
+        "start_year": 1997,
+        "end_year": 2011
+      },
+      {
+        "entity": "Tim Cook",
+        "organization": "Apple",
+        "role": "CEO",
+        "start_year": 2011,
+        "end_year": null
+      }
+    ]
   },
-  
   "apple_ceo_succession_after": {
     "query": "Who leads the company since Tim Cook's departure?",
     "expected_answer": "null or unknown",
     "query_type": "succession",
     "entities": [
-      {"name": "Apple", "type": "ORG"},
-      {"name": "Tim Cook", "type": "PERSON"}
+      {
+        "name": "Apple",
+        "type": "ORG"
+      },
+      {
+        "name": "Tim Cook",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -412,20 +659,46 @@
     ],
     "successions": [],
     "challenge": "counterfactual",
-    "reasoning": "Query assumes Tim Cook has departed, but he is still current CEO (end_date=null). Graph can detect this mismatch."
+    "reasoning": "Query assumes Tim Cook has departed, but he is still current CEO (end_date=null). Graph can detect this mismatch.",
+    "facts": [
+      {
+        "entity": "Tim Cook",
+        "organization": "Apple",
+        "role": "CEO",
+        "start_year": 2011,
+        "end_year": null
+      }
+    ]
   },
-  
   "uk_pm_thatcher_major": {
     "query": "Who became the Prime Minister after Margaret Thatcher?",
     "expected_answer": "John Major",
     "query_type": "succession",
     "entities": [
-      {"name": "United Kingdom", "type": "ORG"},
-      {"name": "Margaret Thatcher", "type": "PERSON"},
-      {"name": "John Major", "type": "PERSON"},
-      {"name": "Tony Blair", "type": "PERSON"},
-      {"name": "Gordon Brown", "type": "PERSON"},
-      {"name": "David Cameron", "type": "PERSON"}
+      {
+        "name": "United Kingdom",
+        "type": "ORG"
+      },
+      {
+        "name": "Margaret Thatcher",
+        "type": "PERSON"
+      },
+      {
+        "name": "John Major",
+        "type": "PERSON"
+      },
+      {
+        "name": "Tony Blair",
+        "type": "PERSON"
+      },
+      {
+        "name": "Gordon Brown",
+        "type": "PERSON"
+      },
+      {
+        "name": "David Cameron",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -495,20 +768,77 @@
       }
     ],
     "challenge": "directional_query",
-    "reasoning": "Directional operator 'after' requires graph succession chain to identify John Major as Thatcher's successor"
+    "reasoning": "Directional operator 'after' requires graph succession chain to identify John Major as Thatcher's successor",
+    "facts": [
+      {
+        "entity": "Margaret Thatcher",
+        "organization": "United Kingdom",
+        "role": "Prime Minister",
+        "start_year": 1979,
+        "end_year": 1990
+      },
+      {
+        "entity": "John Major",
+        "organization": "United Kingdom",
+        "role": "Prime Minister",
+        "start_year": 1990,
+        "end_year": 1997
+      },
+      {
+        "entity": "Tony Blair",
+        "organization": "United Kingdom",
+        "role": "Prime Minister",
+        "start_year": 1997,
+        "end_year": 2007
+      },
+      {
+        "entity": "Gordon Brown",
+        "organization": "United Kingdom",
+        "role": "Prime Minister",
+        "start_year": 2007,
+        "end_year": 2010
+      },
+      {
+        "entity": "David Cameron",
+        "organization": "United Kingdom",
+        "role": "Prime Minister",
+        "start_year": 2010,
+        "end_year": 2016
+      }
+    ]
   },
-  
   "us_presidents_clinton_biden": {
     "query": "Who was the US President while Steve Jobs was the CEO of Apple?",
     "expected_answer": "Bill Clinton or George W. Bush or Barack Obama",
-    "query_year_range": [1997, 2011],
+    "query_year_range": [
+      1997,
+      2011
+    ],
     "entities": [
-      {"name": "United States", "type": "ORG"},
-      {"name": "Bill Clinton", "type": "PERSON"},
-      {"name": "George W. Bush", "type": "PERSON"},
-      {"name": "Barack Obama", "type": "PERSON"},
-      {"name": "Donald Trump", "type": "PERSON"},
-      {"name": "Joe Biden", "type": "PERSON"}
+      {
+        "name": "United States",
+        "type": "ORG"
+      },
+      {
+        "name": "Bill Clinton",
+        "type": "PERSON"
+      },
+      {
+        "name": "George W. Bush",
+        "type": "PERSON"
+      },
+      {
+        "name": "Barack Obama",
+        "type": "PERSON"
+      },
+      {
+        "name": "Donald Trump",
+        "type": "PERSON"
+      },
+      {
+        "name": "Joe Biden",
+        "type": "PERSON"
+      }
     ],
     "roles": [
       {
@@ -578,6 +908,477 @@
       }
     ],
     "challenge": "temporal_overlap",
-    "reasoning": "Query requires finding US Presidents whose tenure overlaps with Steve Jobs' Apple CEO tenure (1997-2011). Clinton, Bush, and Obama all overlap."
+    "reasoning": "Query requires finding US Presidents whose tenure overlaps with Steve Jobs' Apple CEO tenure (1997-2011). Clinton, Bush, and Obama all overlap.",
+    "facts": [
+      {
+        "entity": "Bill Clinton",
+        "organization": "United States",
+        "role": "President",
+        "start_year": 1993,
+        "end_year": 2001
+      },
+      {
+        "entity": "George W. Bush",
+        "organization": "United States",
+        "role": "President",
+        "start_year": 2001,
+        "end_year": 2009
+      },
+      {
+        "entity": "Barack Obama",
+        "organization": "United States",
+        "role": "President",
+        "start_year": 2009,
+        "end_year": 2017
+      },
+      {
+        "entity": "Donald Trump",
+        "organization": "United States",
+        "role": "President",
+        "start_year": 2017,
+        "end_year": 2021
+      },
+      {
+        "entity": "Joe Biden",
+        "organization": "United States",
+        "role": "President",
+        "start_year": 2021,
+        "end_year": null
+      }
+    ]
+  },
+  "michael_mann": {
+    "query": "film directed by Michael Mann",
+    "expected_answer": "Michael Mann",
+    "query_year": 1993,
+    "entities": [
+      {
+        "name": "Michael Mann",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "Michael Mann",
+        "role": "director",
+        "org": "film",
+        "start_date": "1991-01-01",
+        "end_date": "1995-01-01"
+      },
+      {
+        "entity": "Michael Mann",
+        "role": "produced",
+        "org": "film",
+        "start_date": "1991-01-01",
+        "end_date": "1995-01-01"
+      },
+      {
+        "entity": "Michael Mann",
+        "role": "directed",
+        "org": "film",
+        "start_date": "1991-01-01",
+        "end_date": "1995-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "Michael Mann",
+        "organization": "film",
+        "role": "director",
+        "start_year": 1991,
+        "end_year": 1995
+      },
+      {
+        "entity": "Michael Mann",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 1991,
+        "end_year": 1995
+      },
+      {
+        "entity": "Michael Mann",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 1991,
+        "end_year": 1995
+      }
+    ]
+  },
+  "edward_zwick": {
+    "query": "film directed by Edward Zwick",
+    "expected_answer": "Edward Zwick",
+    "query_year": 2004,
+    "entities": [
+      {
+        "name": "Edward Zwick",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "Edward Zwick",
+        "role": "director",
+        "org": "film",
+        "start_date": "2002-01-01",
+        "end_date": "2006-01-01"
+      },
+      {
+        "entity": "Edward Zwick",
+        "role": "produced",
+        "org": "film",
+        "start_date": "2002-01-01",
+        "end_date": "2006-01-01"
+      },
+      {
+        "entity": "Edward Zwick",
+        "role": "directed",
+        "org": "film",
+        "start_date": "2002-01-01",
+        "end_date": "2006-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "Edward Zwick",
+        "organization": "film",
+        "role": "director",
+        "start_year": 2002,
+        "end_year": 2006
+      },
+      {
+        "entity": "Edward Zwick",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 2002,
+        "end_year": 2006
+      },
+      {
+        "entity": "Edward Zwick",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 2002,
+        "end_year": 2006
+      }
+    ]
+  },
+  "john_singleton": {
+    "query": "film directed by John Singleton",
+    "expected_answer": "John Singleton",
+    "query_year": 1993,
+    "entities": [
+      {
+        "name": "John Singleton",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "John Singleton",
+        "role": "director",
+        "org": "film",
+        "start_date": "1991-01-01",
+        "end_date": "1995-01-01"
+      },
+      {
+        "entity": "John Singleton",
+        "role": "produced",
+        "org": "film",
+        "start_date": "1991-01-01",
+        "end_date": "1995-01-01"
+      },
+      {
+        "entity": "John Singleton",
+        "role": "directed",
+        "org": "film",
+        "start_date": "1991-01-01",
+        "end_date": "1995-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "John Singleton",
+        "organization": "film",
+        "role": "director",
+        "start_year": 1991,
+        "end_year": 1995
+      },
+      {
+        "entity": "John Singleton",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 1991,
+        "end_year": 1995
+      },
+      {
+        "entity": "John Singleton",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 1991,
+        "end_year": 1995
+      }
+    ]
+  },
+  "kamal_haasan": {
+    "query": "film directed by Kamal Haasan",
+    "expected_answer": "Kamal Haasan",
+    "query_year": 2000,
+    "entities": [
+      {
+        "name": "Kamal Haasan",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "Kamal Haasan",
+        "role": "director",
+        "org": "film",
+        "start_date": "1998-01-01",
+        "end_date": "2002-01-01"
+      },
+      {
+        "entity": "Kamal Haasan",
+        "role": "produced",
+        "org": "film",
+        "start_date": "1998-01-01",
+        "end_date": "2002-01-01"
+      },
+      {
+        "entity": "Kamal Haasan",
+        "role": "directed",
+        "org": "film",
+        "start_date": "1998-01-01",
+        "end_date": "2002-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "Kamal Haasan",
+        "organization": "film",
+        "role": "director",
+        "start_year": 1998,
+        "end_year": 2002
+      },
+      {
+        "entity": "Kamal Haasan",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 1998,
+        "end_year": 2002
+      },
+      {
+        "entity": "Kamal Haasan",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 1998,
+        "end_year": 2002
+      }
+    ]
+  },
+  "joone": {
+    "query": "film directed by Joone",
+    "expected_answer": "Joone",
+    "query_year": 2005,
+    "entities": [
+      {
+        "name": "Joone",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "Joone",
+        "role": "director",
+        "org": "film",
+        "start_date": "2003-01-01",
+        "end_date": "2007-01-01"
+      },
+      {
+        "entity": "Joone",
+        "role": "produced",
+        "org": "film",
+        "start_date": "2003-01-01",
+        "end_date": "2007-01-01"
+      },
+      {
+        "entity": "Joone",
+        "role": "directed",
+        "org": "film",
+        "start_date": "2003-01-01",
+        "end_date": "2007-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "Joone",
+        "organization": "film",
+        "role": "director",
+        "start_year": 2003,
+        "end_year": 2007
+      },
+      {
+        "entity": "Joone",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 2003,
+        "end_year": 2007
+      },
+      {
+        "entity": "Joone",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 2003,
+        "end_year": 2007
+      }
+    ]
+  },
+  "robert_rodriguez": {
+    "query": "film directed by Robert Rodriguez",
+    "expected_answer": "Robert Rodriguez",
+    "query_year": 2004,
+    "entities": [
+      {
+        "name": "Robert Rodriguez",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "Robert Rodriguez",
+        "role": "director",
+        "org": "film",
+        "start_date": "2002-01-01",
+        "end_date": "2006-01-01"
+      },
+      {
+        "entity": "Robert Rodriguez",
+        "role": "produced",
+        "org": "film",
+        "start_date": "2002-01-01",
+        "end_date": "2006-01-01"
+      },
+      {
+        "entity": "Robert Rodriguez",
+        "role": "directed",
+        "org": "film",
+        "start_date": "2002-01-01",
+        "end_date": "2006-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "Robert Rodriguez",
+        "organization": "film",
+        "role": "director",
+        "start_year": 2002,
+        "end_year": 2006
+      },
+      {
+        "entity": "Robert Rodriguez",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 2002,
+        "end_year": 2006
+      },
+      {
+        "entity": "Robert Rodriguez",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 2002,
+        "end_year": 2006
+      }
+    ]
+  },
+  "alfred_hitchcock": {
+    "query": "film directed by Alfred Hitchcock",
+    "expected_answer": "Alfred Hitchcock",
+    "query_year": 1995,
+    "entities": [
+      {
+        "name": "Alfred Hitchcock",
+        "type": "PERSON"
+      },
+      {
+        "name": "film",
+        "type": "ORG"
+      }
+    ],
+    "roles": [
+      {
+        "entity": "Alfred Hitchcock",
+        "role": "director",
+        "org": "film",
+        "start_date": "1993-01-01",
+        "end_date": "1997-01-01"
+      },
+      {
+        "entity": "Alfred Hitchcock",
+        "role": "produced",
+        "org": "film",
+        "start_date": "1993-01-01",
+        "end_date": "1997-01-01"
+      },
+      {
+        "entity": "Alfred Hitchcock",
+        "role": "directed",
+        "org": "film",
+        "start_date": "1993-01-01",
+        "end_date": "1997-01-01"
+      }
+    ],
+    "successions": [],
+    "facts": [
+      {
+        "entity": "Alfred Hitchcock",
+        "organization": "film",
+        "role": "director",
+        "start_year": 1993,
+        "end_year": 1997
+      },
+      {
+        "entity": "Alfred Hitchcock",
+        "organization": "film",
+        "role": "produced",
+        "start_year": 1993,
+        "end_year": 1997
+      },
+      {
+        "entity": "Alfred Hitchcock",
+        "organization": "film",
+        "role": "directed",
+        "start_year": 1993,
+        "end_year": 1997
+      }
+    ]
   }
 }

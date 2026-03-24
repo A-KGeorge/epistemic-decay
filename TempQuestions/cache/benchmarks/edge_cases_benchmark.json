@@ -1,0 +1,376 @@
+{
+  "source": "Edge_Cases_Advanced_Temporal_Reasoning",
+  "version": "1.0",
+  "creation_date": "2026-03-11T00:00:00Z",
+  "total_cases": 15,
+  "description": "Advanced edge cases testing compositional stacking, query intent alignment, temporal contamination, multi-role succession, fuzzy temporal intent, negative/exclusive queries, and mathematical stability boundaries. Designed to stress-test the limits of Phase 2 logic.",
+  "methodology": "Hand-crafted adversarial cases targeting specific weaknesses: nested epistemic uncertainty, contradictory tense anchors, former role problems, concurrent leadership, relative eras, overlapping lifespans, exclusionary queries, historical locks, conditional physical laws, and axiom failure propagation.",
+  "categories": ["compositional_contamination", "multi_role_succession", "fuzzy_temporal_intent", "negative_exclusive_intent", "mathematical_stability"],
+  "test_cases": [
+    {
+      "query": "It is widely believed that researchers estimate that 2+2=4.",
+      "category": "compositional_contamination",
+      "documents": {
+        "nested_uncertainty": {
+          "text": "It is widely believed that researchers estimate that 2+2=4.",
+          "acquired": "2020-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Multiple epistemic qualifiers (believed + estimate) should compound uncertainty decay"
+        },
+        "clean_mathematical": {
+          "text": "2+2=4 is a fundamental arithmetic truth.",
+          "acquired": "2020-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Clean mathematical statement with zero decay"
+        }
+      },
+      "expected_winner": "clean_mathematical",
+      "difficulty": "hard",
+      "reasoning": "Nested epistemic uncertainty ('believed' + 'estimate') should trigger contamination and prevent zero decay, making the clean mathematical statement preferred despite identical semantic content",
+      "source": "gemini_suggestions",
+      "verified": false
+    },
+    {
+      "query": "The current CEO was the founder in 1998.",
+      "category": "compositional_contamination",
+      "documents": {
+        "contradictory_tense": {
+          "text": "The current CEO was the founder in 1998.",
+          "acquired": "2024-01-01T00:00:00Z",
+          "is_correct": false,
+          "note": "Contradictory: 'current' (high decay) vs '1998' (historical seal)"
+        },
+        "clean_historical": {
+          "text": "Steve Jobs founded Apple in 1976.",
+          "acquired": "1990-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Clean historical fact with proper sealing"
+        }
+      },
+      "expected_winner": "clean_historical",
+      "difficulty": "hard",
+      "reasoning": "Contradictory tense anchors: 'current' suggests high decay (INSTITUTIONAL_LEADERSHIP 0.002 * 2.1 multiplier) while '1998' suggests historical seal. The temporal marker should override the historical anchor, preventing seal",
+      "source": "gemini_suggestions",
+      "verified": false
+    },
+    {
+      "query": "Who is the former President?",
+      "category": "multi_role_succession",
+      "documents": {
+        "former_role_confusion": {
+          "text": "Joe Biden is the former President and currently leads a new foundation.",
+          "acquired": "2025-02-01T00:00:00Z",
+          "is_correct": false,
+          "note": "'Former President' should be sealed as historical, but 'currently leads' is active"
+        },
+        "current_president": {
+          "text": "Donald Trump is the President since January 2025.",
+          "acquired": "2025-01-20T00:00:00Z",
+          "is_correct": true,
+          "note": "Current president, not the former one"
+        }
+      },
+      "expected_winner": "current_president",
+      "difficulty": "medium",
+      "reasoning": "Query asks 'Who is the former President' - this is a trick question. The system should recognize that 'former' modifies the role, not asking about current former-holder, but rather asking for identification. Standard RAG confuses 'former President' with current leadership.",
+      "annotation_policy": "intentional_role_disambiguation",
+      "annotation_note": "This case intentionally labels current_president as the expected winner to test role disambiguation under present-tense framing ('Who is...'). A separate fuzzy benchmark case uses a distinct historical phrasing ('Who was the former US President?') and follows a different expected-winner policy.",
+      "source": "gemini_suggestions",
+      "verified": false
+    },
+    {
+      "query": "What companies does Elon Musk lead?",
+      "category": "multi_role_succession",
+      "documents": {
+        "concurrent_roles": {
+          "text": "Elon Musk is the CEO of Tesla and the owner of X (formerly Twitter).",
+          "acquired": "2024-06-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Single mortal entity with two concurrent institutional roles"
+        },
+        "outdated_single": {
+          "text": "Elon Musk is the CEO of Tesla and leads innovation in electric vehicles.",
+          "acquired": "2020-06-01T00:00:00Z",
+          "is_correct": false,
+          "note": "Older document, missing X ownership"
+        }
+      },
+      "expected_winner": "concurrent_roles",
+      "difficulty": "medium",
+      "reasoning": "Tests how system handles single mortal entity (λ=0.002) linked to two institutional roles simultaneously. Temporal decay should prefer more recent comprehensive document",
+      "source": "gemini_suggestions",
+      "verified": true
+    },
+    {
+      "query": "Who was the leader of the UK around the turn of the millennium?",
+      "category": "fuzzy_temporal_intent",
+      "documents": {
+        "tony_blair_1999": {
+          "text": "Tony Blair served as Prime Minister of the United Kingdom from 1997 to 2007.",
+          "acquired": "1999-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1999,
+          "person": "Tony Blair"
+        },
+        "david_cameron_2012": {
+          "text": "David Cameron served as Prime Minister of the United Kingdom from 2010 to 2016.",
+          "acquired": "2012-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2012,
+          "person": "David Cameron"
+        }
+      },
+      "expected_winner": "tony_blair_1999",
+      "difficulty": "hard",
+      "reasoning": "Tests fuzzy temporal parsing: 'turn of the millennium' should map to ~1998-2002 range. Tony Blair (1997-2007) is correct; David Cameron (2010-2016) is wrong era",
+      "source": "gemini_suggestions",
+      "verified": true
+    },
+    {
+      "query": "Who was the US President while Steve Jobs was the CEO of Apple?",
+      "category": "fuzzy_temporal_intent",
+      "documents": {
+        "clinton_1998": {
+          "text": "Bill Clinton served as US President from 1993 to 2001.",
+          "acquired": "1998-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1998,
+          "note": "Overlaps with Jobs CEO tenure (1997-2011)"
+        },
+        "trump_2018": {
+          "text": "Donald Trump served as US President from 2017 to 2021.",
+          "acquired": "2018-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2018,
+          "note": "After Jobs' death in 2011"
+        }
+      },
+      "expected_winner": "clinton_1998",
+      "difficulty": "very_hard",
+      "reasoning": "Requires resolving temporal range of one entity (Steve Jobs CEO: 1997-2011) to set query intent for another (US President during that period). Multiple correct answers exist (Clinton, Bush, Obama), but Clinton document from 1998 is within Jobs' tenure",
+      "source": "gemini_suggestions",
+      "verified": true
+    },
+    {
+      "query": "Who was the CEO of Apple before Tim Cook?",
+      "category": "negative_exclusive_intent",
+      "documents": {
+        "steve_jobs_2005": {
+          "text": "Steve Jobs served as CEO of Apple from 1997 to 2011.",
+          "acquired": "2005-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2005,
+          "person": "Steve Jobs",
+          "note": "Before Tim Cook (2011+)"
+        },
+        "tim_cook_2018": {
+          "text": "Tim Cook served as CEO of Apple since 2011.",
+          "acquired": "2018-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2018,
+          "person": "Tim Cook",
+          "note": "This IS Tim Cook, query asks for before"
+        }
+      },
+      "expected_winner": "steve_jobs_2005",
+      "difficulty": "hard",
+      "reasoning": "Exclusionary query: 'before Tim Cook' requires temporal intent window ending at 2011. System should aggressively discount Tim Cook documents (even though semantically relevant) and prefer pre-2011 documents",
+      "source": "gemini_suggestions",
+      "verified": true
+    },
+    {
+      "query": "Give me a 1990s perspective on the future of the internet.",
+      "category": "negative_exclusive_intent",
+      "documents": {
+        "1995_perspective": {
+          "text": "The internet will revolutionize communication and commerce. Experts predict widespread adoption by 2005, with email becoming the primary business tool.",
+          "acquired": "1995-06-15T00:00:00Z",
+          "is_correct": true,
+          "era": 1995,
+          "note": "Historical 1990s perspective"
+        },
+        "2024_retrospective": {
+          "text": "The internet revolutionized communication and commerce. By 2024, social media, cloud computing, and AI have transformed society in ways 1990s experts never predicted.",
+          "acquired": "2024-06-15T00:00:00Z",
+          "is_correct": false,
+          "era": 2024,
+          "note": "Modern retrospective - more accurate but wrong temporal perspective"
+        }
+      },
+      "expected_winner": "1995_perspective",
+      "difficulty": "very_hard",
+      "reasoning": "Historical-only lock: Query explicitly requests 1990s perspective, not current accuracy. Should penalize modern documents (even though more 'correct') to retrieve historically situated belief from requested era. This is paradigm-locked temporal retrieval.",
+      "source": "gemini_suggestions",
+      "verified": true
+    },
+    {
+      "query": "In a vacuum, light travels at approximately 299,792,458 m/s.",
+      "category": "mathematical_stability",
+      "documents": {
+        "conditional_physical_law": {
+          "text": "In a vacuum, light travels at approximately 299,792,458 meters per second.",
+          "acquired": "2015-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Paradigm qualifier 'in a vacuum' - does this contaminate?"
+        },
+        "unconditional_law": {
+          "text": "The speed of light is a fundamental physical constant at 299,792,458 m/s.",
+          "acquired": "2015-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Unconditional statement, cleaner"
+        }
+      },
+      "expected_winner": "conditional_physical_law",
+      "difficulty": "hard",
+      "reasoning": "Tests boundary between zero decay and paradigm decay. 'In a vacuum' is a paradigm qualifier but doesn't invalidate the law - it's the correct scientific statement. Should maintain PHYSICAL_LAW decay (0.0001), not trigger contamination.",
+      "source": "gemini_suggestions",
+      "verified": false
+    },
+    {
+      "query": "Do parallel lines meet in geometry?",
+      "category": "mathematical_stability",
+      "documents": {
+        "euclidean_geometry": {
+          "text": "In Euclidean geometry, parallel lines never meet.",
+          "acquired": "2015-01-01T00:00:00Z",
+          "is_correct": true,
+          "paradigm": "Euclidean",
+          "note": "True in Euclidean paradigm"
+        },
+        "non_euclidean_geometry": {
+          "text": "In non-Euclidean geometry, parallel lines can meet.",
+          "acquired": "2015-01-01T00:00:00Z",
+          "is_correct": true,
+          "paradigm": "Non-Euclidean",
+          "note": "True in non-Euclidean paradigm"
+        }
+      },
+      "expected_winner": "euclidean_geometry",
+      "difficulty": "very_hard",
+      "reasoning": "Axiom failure propagation test: Query doesn't specify paradigm. Standard assumption is Euclidean geometry. Both statements are correct in their paradigms but have MATHEMATICAL_TRUTH decay (0.0). System should prefer Euclidean as default paradigm assumption.",
+      "source": "gemini_suggestions",
+      "verified": false
+    },
+    {
+      "query": "Who was the CEO of Amazon in 2021?",
+      "category": "fuzzy_temporal_intent",
+      "documents": {
+        "jeff_bezos_early_2021": {
+          "text": "Jeff Bezos served as CEO of Amazon from 1994 to July 2021.",
+          "acquired": "2021-03-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021,
+          "person": "Jeff Bezos",
+          "note": "Correct for most of 2021"
+        },
+        "andy_jassy_late_2021": {
+          "text": "Andy Jassy became CEO of Amazon in July 2021.",
+          "acquired": "2021-09-15T00:00:00Z",
+          "is_correct": true,
+          "era": 2021,
+          "person": "Andy Jassy",
+          "note": "Correct for late 2021"
+        }
+      },
+      "expected_winner": "jeff_bezos_early_2021",
+      "difficulty": "very_hard",
+      "reasoning": "Ambiguous temporal query: 2021 had TWO CEOs (Bezos Jan-Jun, Jassy Jul-Dec). Both are technically correct. System should prefer earlier document from 2021-03 over later one from 2021-09, or recognize both as valid. Tests mid-year transitions.",
+      "source": "gemini_suggestions",
+      "verified": true
+    },
+    {
+      "query": "What is the capital of the United States?",
+      "category": "mathematical_stability",
+      "documents": {
+        "washington_dc_current": {
+          "text": "Washington, D.C. is the capital of the United States.",
+          "acquired": "2020-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Geographic fact, stable"
+        },
+        "philadelphia_historical": {
+          "text": "Philadelphia served as the capital of the United States from 1790 to 1800.",
+          "acquired": "1995-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Historical fact, sealed but outdated"
+        }
+      },
+      "expected_winner": "washington_dc_current",
+      "difficulty": "medium",
+      "reasoning": "Query asks 'What is' (present tense) - should prefer current capital (D.C.) over historical capital (Philadelphia). Tests tense detection in queries.",
+      "source": "edge_case_validation",
+      "verified": true
+    },
+    {
+      "query": "The CEO announced quarterly earnings that exceeded expectations.",
+      "category": "compositional_contamination",
+      "documents": {
+        "vague_temporal": {
+          "text": "The CEO announced quarterly earnings that exceeded expectations.",
+          "acquired": "2023-01-01T00:00:00Z",
+          "is_correct": false,
+          "note": "No entity, no specific quarter - high uncertainty"
+        },
+        "specific_fact": {
+          "text": "Apple CEO Tim Cook announced Q4 2022 earnings of $117.2 billion, exceeding analyst expectations of $115 billion.",
+          "acquired": "2023-01-15T00:00:00Z",
+          "is_correct": true,
+          "note": "Specific entity, date, numbers - low uncertainty"
+        }
+      },
+      "expected_winner": "specific_fact",
+      "difficulty": "medium",
+      "reasoning": "Vague temporal reference ('quarterly earnings') without specific entity or date should have higher decay than specific, verifiable fact with entity and quarter specified",
+      "source": "compositional_validation",
+      "verified": false
+    },
+    {
+      "query": "Who became the Prime Minister after Margaret Thatcher?",
+      "category": "negative_exclusive_intent",
+      "documents": {
+        "john_major_successor": {
+          "text": "John Major became Prime Minister after Margaret Thatcher in 1990.",
+          "acquired": "1991-06-15T00:00:00Z",
+          "is_correct": true,
+          "person": "John Major",
+          "note": "Direct successor"
+        },
+        "margaret_thatcher_herself": {
+          "text": "Margaret Thatcher served as Prime Minister from 1979 to 1990.",
+          "acquired": "1989-06-15T00:00:00Z",
+          "is_correct": false,
+          "person": "Margaret Thatcher",
+          "note": "Query asks for AFTER Thatcher"
+        }
+      },
+      "expected_winner": "john_major_successor",
+      "difficulty": "medium",
+      "reasoning": "Succession query: 'after Margaret Thatcher' requires temporal intent starting at 1990. Should prefer John Major (successor) over Thatcher herself (semantically relevant but wrong temporal position)",
+      "source": "succession_validation",
+      "verified": true
+    },
+    {
+      "query": "Some scientists believe climate change may be caused by human activity.",
+      "category": "compositional_contamination",
+      "documents": {
+        "hedged_statement": {
+          "text": "Some scientists believe climate change may be caused by human activity.",
+          "acquired": "2023-01-01T00:00:00Z",
+          "is_correct": false,
+          "note": "Multiple hedges: 'some', 'believe', 'may' - high epistemic uncertainty"
+        },
+        "scientific_consensus": {
+          "text": "The scientific consensus is that climate change is caused primarily by human activity. Over 97% of climate scientists agree.",
+          "acquired": "2023-01-01T00:00:00Z",
+          "is_correct": true,
+          "note": "Strong consensus statement with quantification"
+        }
+      },
+      "expected_winner": "scientific_consensus",
+      "difficulty": "hard",
+      "reasoning": "Multiple epistemic hedges ('some', 'believe', 'may') should compound uncertainty decay, making the consensus statement with quantification ('97%', 'primarily') preferred despite both being from same era",
+      "source": "epistemic_contamination_validation",
+      "verified": false
+    }
+  ]
+}

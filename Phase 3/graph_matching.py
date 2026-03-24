@@ -165,7 +165,7 @@ def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
         if org:
             role_to_check = constraints.get("role", "CEO")  # Default to CEO if founder not found
             all_holders = knowledge_graph.get_all_role_holders(org, role_to_check)
-            
+
             if all_holders:
                 # Founder is earliest holder
                 founder = all_holders[0]["entity"]
@@ -173,7 +173,27 @@ def compute_graph_alignment(query: str, knowledge_graph: TemporalKnowledgeGraph,
                 result["match_type"] = "EXACT"
                 result["matched_entity"] = founder
                 result["explanation"] = f"{founder} was founder / earliest {role_to_check} of {org}"
-    
+
+    # Handle film queries
+    elif query_type == "film_role":
+        entity = constraints.get("entity") # e.g. "Michael Mann"
+        role_type = constraints.get("role")
+        if entity and org == "film":
+            # Search if we have this entity in graph
+            if entity in knowledge_graph.graph.nodes:
+                result["score"] = 1.0
+                result["match_type"] = "EXACT"
+                result["matched_entity"] = entity
+                
+                # Fetch year from graph roles to pass to era adjustment
+                for u, v, data in knowledge_graph.graph.edges(data=True):
+                    if u == entity and v == "film" and data.get("role") == role_type:
+                        if data.get("start"):
+                            result["role_start_year"] = data["start"].year
+                        break
+                        
+                result["explanation"] = f"Film constraint recognized for {entity} as {role_type}"
+
     # Handle temporal overlap queries ("while" queries)
     elif query_type == "temporal_overlap":
         # Example: "Who was President while Steve Jobs was CEO of Apple?"
@@ -338,7 +358,14 @@ def compute_era_adjusted_score(graph_result: Dict, doc_acquired_date: Optional[d
         return 0.0
     
     # No era adjustment if no query year or doc date
-    if not query_year or not doc_acquired_date:
+    if not query_year:
+        # Fallback to role_start_year from graph_result
+        if "role_start_year" in graph_result:
+            query_year = graph_result["role_start_year"]
+        else:
+            return base_score
+            
+    if not doc_acquired_date:
         return base_score
     
     # Compute era gap

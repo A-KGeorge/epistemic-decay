@@ -41,7 +41,11 @@ def extract_year_constraints(text: str) -> List[int]:
         (r'end of (the )?(\d{4})s', lambda m: [int(m.group(2)) * 10 + 8, int(m.group(2)) * 10 + 10]),
         (r'beginning of (the )?(\d{4})s', lambda m: [int(m.group(2)) * 10, int(m.group(2)) * 10 + 2]),
         (r'mid[- ](\d{4})s', lambda m: [int(m.group(1)) * 10 + 4, int(m.group(1)) * 10 + 6]),
+        (r'late (?:in the )?(\d{4})s', lambda m: [int(m.group(1)) * 10 + 7, int(m.group(1)) * 10 + 9]),
+        (r'during the late (\d{4})s', lambda m: [int(m.group(1)) * 10 + 7, int(m.group(1)) * 10 + 9]),
         (r'around (\d{4})', lambda m: [int(m.group(1)) - 2, int(m.group(1)) + 2]),
+        (r'shortly after (\d{4})', lambda m: [int(m.group(1)) + 1, int(m.group(1)) + 3]),
+        (r'preceding (\d{4})', lambda m: [int(m.group(1)) - 3, int(m.group(1)) - 1]),
     ]
     
     for pattern, result in fuzzy_patterns:
@@ -218,8 +222,8 @@ def detect_temporal_markers(text: str) -> Dict[str, bool]:
     text_lower = text.lower()
     
     # Detect directional operators with context (handles  possessives and multi-word phrases)
-    before_match = re.search(r'before\s+([\w\']+(?:\s+[\w\']+)*)', text_lower)
-    after_match = re.search(r'(?:after|since)\s+([\w\']+(?:\s+[\w\']+)*)', text_lower)
+    before_match = re.search(r'(?:before|preceding|prior to)\s+([\w\']+(?:\s+[\w\']+)*)', text_lower)
+    after_match = re.search(r'(?:after|since|shortly after|following)\s+([\w\']+(?:\s+[\w\']+)*)', text_lower)
     
     markers = {
         "current": any(word in text_lower for word in ["current", "currently", "now", "today"]),
